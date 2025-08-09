@@ -1,169 +1,106 @@
+'use client'
+
 import Link from 'next/link'
-import { RiHeartLine, RiShareLine, RiStarFill, RiStarHalfFill, RiStarLine, RiCalendarLine, RiArrowRightLine } from 'react-icons/ri'
-
-const trendingProperties = [
-  {
-    id: '1',
-    title: 'Modern Downtown Apartment',
-    location: 'Financial District, NYC',
-    image: 'https://public.readdy.ai/ai/img_res/f1abce78fbacb02e81d3dbd963d9b2cd.jpg',
-    price: '$2,800/night',
-    size: 'Room Size: 50sqm',
-    bed: 'Bed: 1 bed',
-    max: 'Max: 6 adults',
-    rating: 4.5,
-    reviews: 42,
-    tag: { text: 'Popular', color: 'bg-accent' }
-  },
-  {
-    id: '2',
-    title: 'Luxury Waterfront Condo',
-    location: 'Brooklyn Heights, NYC',
-    image: 'https://public.readdy.ai/ai/img_res/69fb77b370ddd22c1e71b232dded5b2a.jpg',
-    price: '$3,600/night',
-    originalPrice: '$4,000/night',
-    size: 'Room Size: 50sqm',
-    bed: 'Bed: 1 bed',
-    max: 'Max: 6 adults',
-    rating: 4,
-    reviews: 28,
-    tag: { text: '-10%', color: 'bg-secondary' }
-  },
-  {
-    id: '3',
-    title: 'Charming West Village Studio',
-    location: 'West Village, NYC',
-    image: 'https://public.readdy.ai/ai/img_res/77c34cbd1a0059da09fce488590c7e69.jpg',
-    price: '$1,750/night',
-    size: 'Room Size: 50sqm',
-    bed: 'Bed: 1 bed',
-    max: 'Max: 6 adults',
-    rating: 5,
-    reviews: 56
-  },
-  {
-    id: '4',
-    title: 'Spacious Soho Loft',
-    location: 'Soho, NYC',
-    image: 'https://public.readdy.ai/ai/img_res/f0b5df59e6525ad7f2063d975c43f896.jpg',
-    price: '$3,200/night',
-    rating: 4.5,
-    size: 'Room Size: 50sqm',
-    bed: 'Bed: 1 bed',
-    max: 'Max: 6 adults',
-    reviews: 87,
-    tag: { text: 'Bestseller', color: 'bg-green-500' }
-  },
-  {
-    id: '5',
-    title: 'Garden Apartment',
-    location: 'Upper West Side, NYC',
-    image: 'https://public.readdy.ai/ai/img_res/c1f641df1368538f08a33800fa407130.jpg',
-    price: '$2,100/night',
-    rating: 4,
-    size: 'Room Size: 50sqm',
-    bed: 'Bed: 1 bed',
-    max: 'Max: 6 adults',
-    reviews: 34
-  }
-]
-
-const renderStars = (rating) => {
-  const stars = []
-  const fullStars = Math.floor(rating)
-  const hasHalfStar = rating % 1 >= 0.5
-
-  for (let i = 1; i <= 5; i++) {
-    if (i <= fullStars) {
-      stars.push(<RiStarFill key={i} className="text-yellow-400" />)
-    } else if (i === fullStars + 1 && hasHalfStar) {
-      stars.push(<RiStarHalfFill key={i} className="text-yellow-400" />)
-    } else {
-      stars.push(<RiStarLine key={i} className="text-yellow-400" />)
-    }
-  }
-  return stars
-}
+import { useEffect, useState } from 'react'
+import { RiHeartLine, RiShareLine, RiCalendarLine, RiArrowRightLine } from 'react-icons/ri'
+import { fetchRates, fetchAccommodationTypes, fetchReviews } from '@/app/api'
+import Rating from './rating'
+import PropertyCard from './propertyCard '
 
 export default function TrendingProperties() {
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch both rates and accommodation types
+        const [rates, accommodationTypes, { data }] = await Promise.all([
+          fetchRates(),
+          fetchAccommodationTypes(),
+          fetchReviews()
+        ])
+
+        // Combine the data to create property listings
+        const combinedProperties = rates.map(rate => {
+          const accommodation = accommodationTypes.find(acc => acc.id === rate.accommodation_type_id)
+
+          // Find the base price (you might want to implement more sophisticated price logic)
+          const basePrice = rate.season_prices?.[0]?.base_price || 0
+          const pricePerNight = `${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(basePrice)}/night`
+
+          // Get the first image if available
+          const image = accommodation?.images?.[0]?.src || 'https://via.placeholder.com/280x320'
+          // Filter reviews for this accommodation
+          const propertyReviews = data.filter(
+            review => typeof review.post_id === 'number'
+              ? review.post_id === accommodation?.id
+              : Number(review.post_id) === accommodation?.id
+          )
+
+          // Calculate average rating
+          const avgRating = propertyReviews.length > 0
+            ? propertyReviews.reduce((sum, review) => sum + parseInt(review.rating), 0) / propertyReviews.length
+            : 0 // Default if no reviews
+
+          return {
+            id: rate.id,
+            title: rate.title || 'Untitled Property',
+            location: accommodation?.view || 'Location not specified',
+            image,
+            price: pricePerNight,
+            size: `Room Size: ${accommodation?.size || 'N/A'}sqm`,
+            bed: `Bed: ${accommodation?.bed_type || 'N/A'}`,
+            max: `Max: ${accommodation?.adults || 0} adults, ${accommodation?.children || 0} children`,
+            rating: avgRating,
+            reviews: propertyReviews.length,
+            description: rate.description || '',
+            tag: rate.status === 'active' ? { text: accommodation.tags[0].name, color: accommodation.tags[0].name === 'Bestseller' ? 'bg-green-500' : accommodation.tags[0].name === '-10%' ? 'bg-secondary' : 'bg-accent' } : null
+          }
+        })
+
+        setProperties(combinedProperties)
+      } catch (error) {
+        console.error('Error fetching properties:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-7xl text-center">
+          <p>Loading properties...</p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex justify-between items-center mb-8">
           <h2 className="sm:text-4xl text-2xl font-bold">Trending Properties</h2>
-          <Link href="#" className="text-accent font-medium flex items-center">
+          <Link href="/apartments" className="text-accent font-medium flex items-center">
             View All
             <RiArrowRightLine className="w-4 h-4 ml-1" />
           </Link>
         </div>
 
         <div className="relative overflow-hidden">
-          <div className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4">
-            {trendingProperties.map((property) => (
-              <div key={property.id} className="min-w-[280px] max-w-[280px] bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 group">
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={property.image}
-                    alt={property.title}
-                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                  />
-
-                  {/* Action buttons */}
-                  <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-accent hover:text-white">
-                      <RiHeartLine />
-                    </button>
-                    <button className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-accent hover:text-white">
-                      <RiShareLine />
-                    </button>
-                  </div>
-
-                  {/* Tag */}
-                  {property.tag && (
-                    <div className="absolute top-3 left-3">
-                      <span className={`${property.tag.color} text-white text-xs px-2 py-1 rounded`}>
-                        {property.tag.text}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4">
-                  {/* Rating */}
-                  <div className="flex items-center mb-2">
-                    <div className="flex">
-                      {renderStars(property.rating)}
-                    </div>
-                    <span className="text-gray-500 text-xs ml-1">({property.reviews} reviews)</span>
-                  </div>
-
-                  {/* Property info */}
-                  <h3 className="font-bold mb-1">{property.title}</h3>
-                  <section className='text-gray-500 text-sm mb-3'>
-                    <p>{property.size}</p>
-                    <p>{property.bed}</p>
-                    <p>{property.max}</p>
-                    <p>{property.location}</p>
-                  </section>
-
-                  {/* Price and booking */}
-                  <div className="flex justify-between items-center border-t pt-3">
-                    <div>
-                      <span className="font-bold text-lg">{property.price}</span>
-                      {property.originalPrice && (
-                        <span className="text-gray-400 text-sm line-through ml-2">
-                          {property.originalPrice}
-                        </span>
-                      )}
-                    </div>
-                    <button className="bg-accent/10 hover:bg-accent text-accent hover:text-white p-2 rounded-full transition-colors">
-                      <RiCalendarLine className="w-6 h-6" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {properties.length === 0 ? (
+            <p>No properties available at the moment.</p>
+          ) : (
+            <div className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4">
+              {properties.map((property) => (
+                <PropertyCard key={property.id} classes={'min-w-[280px] max-w-[280px]'} property={property}/>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -1,17 +1,24 @@
 'use client'
 
-import ImageGallery from "@/components/gallery";
-import Rating from "@/components/rating";
-import TrendingProperties from "@/components/trendingProperties";
-import { RiAirplayLine, RiBikeLine, RiBrushLine, RiCalendarCheckLine, RiCalendarLine, RiCarLine, RiChat3Line, RiCheckLine, RiCupLine, RiDoorLockLine, RiGroupLine, RiHome4Line, RiHotelBedLine, RiKeyLine, RiLuggageDepositLine, RiMapPinLine, RiPhoneLine, RiRestaurantLine, RiRulerLine, RiShowersLine, RiUserLine, RiWifiLine, RiWindyLine } from "react-icons/ri";
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import BookingForm from "@/components/bookingForm";
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { fetchRateById, fetchAccommodationTypeById, fetchReviews, checkAvailability } from '@/app/api'
+import ImageGallery from '@/components/gallery'
+import Rating from '@/components/rating'
+import BookingForm from '@/components/bookingForm'
+import Testimonial from '@/components/testimonies'
+// import PropertyCard from '@/components/propertyCard'
+import { RiHome4Line, RiHotelBedLine, RiShowersLine, RiRulerLine, RiUserLine, RiWifiLine, RiAirplayLine, RiWindyLine, RiCupLine, RiRestaurantLine, RiCheckLine, RiBrushLine, RiLuggageDepositLine, RiCarLine, RiBikeLine, RiDoorLockLine, RiCalendarCheckLine, RiKeyLine, RiGroupLine, RiChat3Line, RiPhoneLine } from 'react-icons/ri'
+import TrendingProperties from '@/components/trendingProperties'
 
 export default function DetailPage() {
 
-  const [activeTab, setActiveTab] = useState('Overview');
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [property, setProperty] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState('Overview')
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
+  const [number, setNumber] = useState('')
 
   const tabs = [
     { id: 'Overview', label: 'Overview', href: '#overview' },
@@ -21,46 +28,106 @@ export default function DetailPage() {
     { id: 'Sales', label: 'Contact Sales', href: '#sales' }
   ];
 
-  // Update indicator position when tab changes
   useEffect(() => {
-    const activeElement = document.querySelector('.active-tab');
+    const loadProperty = async () => {
+      const baseUrl = window.location.href;
+      const pathParts = baseUrl.split('/'); // Split the URL by '/'
+      setNumber(pathParts[pathParts.length - 1]); // Get the last part
+
+      try {
+        setLoading(true)
+        setError(null)
+
+        const rate = await fetchRateById(number)
+
+        if (!rate || !rate.accommodation_type_id) {
+          throw new Error('Property not found')
+        }
+
+        // Fetch accommodation data
+        const accommodation = await fetchAccommodationTypeById(rate.accommodation_type_id)
+
+        // Combine the data
+        setProperty({
+          ...rate,
+          ...accommodation,
+          basePrice: rate.season_prices?.[0]?.base_price || 0,
+          totalCapacity: accommodation.adults + accommodation.children
+        })
+      } catch (error) {
+        setError(error.message)
+        console.error('Error loading property:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProperty()
+  }, [number])
+
+  useEffect(() => {
+    const activeElement = document.querySelector('.active-tab')
     if (activeElement) {
       setIndicatorStyle({
         left: activeElement.offsetLeft,
         width: activeElement.offsetWidth
-      });
+      })
     }
-  }, [activeTab]);
+  }, [activeTab])
 
-  return (
-    <section className="pt-28">
-      {/* <!-- Property Header --> */}
-      <section className="bg-white border-b border-gray-100">
-        <div className="container mx-auto max-w-7xl px-4 pb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div>
-              <h1 className="md:text-4xl text-2xl font-bold">Luxury Soho Loft</h1>
-              <div className="flex items-center mt-2">
-                <Rating initialValue={4.7} className="mr-2" />
-                <span className="text-gray-600 text-sm">4.7 (128 reviews)</span>
-                <span className="mx-3 text-gray-300">|</span>
-                <span className="text-gray-600 text-sm flex items-center">
-                  <RiMapPinLine className="mr-2" /> Soho, Manhattan
-                </span>
-              </div>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <button className="bg-accent hover:bg-accent/90 text-white px-6 py-3 font-medium !rounded-button flex items-center">
-                <RiCalendarLine className="mr-2" /> Check Availability
-              </button>
-            </div>
+  if (loading) {
+    return (
+      <section className="pt-24 bg-light min-h-screen">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/3 mb-8"></div>
+            <div className="h-96 bg-gray-200 rounded mb-8"></div>
           </div>
         </div>
       </section>
+    )
+  }
 
+  if (error) {
+    return (
+      <section className="pt-24 bg-light min-h-screen">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </section>
+    )
+  }
+
+  if (!property) {
+    return (
+      <section className="pt-24 bg-light min-h-screen">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <p>Property not found</p>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="pt-24">
+      {/* <!-- Property Header --> */}
+      <div>{console.log(property)}</div>
       <section className='bg-light'>
-        {/* <!-- Gallery --> */}
-        <ImageGallery />
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <h1 className="md:text-4xl text-2xl font-bold">{property.title}</h1>
+          <div className="flex items-center mt-2">
+            <Rating initialValue={4.7} className="mr-2" />
+            <span className="text-gray-600 text-sm">4.7 (128 reviews)</span>
+            <span className="mx-3 text-gray-300">|</span>
+            <span className="text-gray-600 text-sm flex items-center">
+              <RiMapPinLine className="mr-2" /> {property.view || 'Location not specified'}
+            </span>
+          </div>
+        </div>
+
+        {/* Gallery */}
+        <ImageGallery images={property.images || []} />
 
         {/* <!-- Main Content --> */}
         <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -73,10 +140,7 @@ export default function DetailPage() {
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
-                      className={`py-3 relative text-sm font-medium transition-colors ${activeTab === tab.id
-                        ? 'text-accent'
-                        : 'text-gray-600 hover:text-accent'
-                        }`}
+                      className={`py-3 relative text-sm font-medium transition-colors ${activeTab === tab.id ? 'text-accent active-tab' : 'text-gray-600 hover:text-accent'}`}
                       onClick={() => setActiveTab(tab.id)}
                     >
                       <span className="relative z-10">{tab.label}</span>
@@ -107,8 +171,8 @@ export default function DetailPage() {
                   >
                     {/* <!-- Overview Section --> */}
                     <section className="mb-12">
-                      <h2 className="text-2xl font-bold mb-4">Modern Luxury in Historic Soho</h2>
-                      <p className="text-gray-600 mb-6">This stunning loft apartment combines historic Soho charm with modern luxury. Located on a quiet tree-lined street, the property features 12-foot ceilings, oversized windows, and elegant finishes throughout. The open floor plan is perfect for entertaining, while the private bedroom wing offers a peaceful retreat.</p>
+                      <h2 className="text-2xl font-bold mb-4">{property.title}</h2>
+                      <p className="text-gray-600 mb-6">{property.description || 'No description available'}</p>
 
                       <div className="grid grid-cols-2 gap-6 mb-8">
                         <div className="flex items-start">
@@ -117,7 +181,7 @@ export default function DetailPage() {
                           </div>
                           <div>
                             <h3 className="font-bold mb-1">Bedroom</h3>
-                            <p className="text-gray-600">1 king bed with premium linens</p>
+                            <p className="text-gray-600">{property.bed_type || 'N/A'}</p>
                           </div>
                         </div>
                         <div className="flex items-start">
@@ -135,7 +199,7 @@ export default function DetailPage() {
                           </div>
                           <div>
                             <h3 className="font-bold mb-1">Size</h3>
-                            <p className="text-gray-600">1,250 sqft (116 m²)</p>
+                            <p className="text-gray-600">{property.size ? `${property.size} sqft` : 'N/A'}</p>
                           </div>
                         </div>
                         <div className="flex items-start">
@@ -144,28 +208,18 @@ export default function DetailPage() {
                           </div>
                           <div>
                             <h3 className="font-bold mb-1">Occupancy</h3>
-                            <p className="text-gray-600">Up to 2 guests</p>
+                            <p className="text-gray-600">Up to {property.adults} adults, {property.children} children</p>
                           </div>
                         </div>
                       </div>
 
                       <div className="border-t border-b border-gray-200 py-6 mb-6">
                         <div className="flex flex-wrap gap-4">
-                          <span className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
-                            <RiWifiLine className="mr-2 text-accent" /> High-speed WiFi
-                          </span>
-                          <span className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
-                            <RiAirplayLine className=" mr-2 text-accent" /> Smart TV
-                          </span>
-                          <span className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
-                            <RiWindyLine className=" mr-2 text-accent" /> Air conditioning
-                          </span>
-                          <span className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
-                            <RiCupLine className="mr-2 text-accent" /> Coffee maker
-                          </span>
-                          <span className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
-                            <RiRestaurantLine className="mr-2 text-accent" /> Fully equipped kitchen
-                          </span>
+                          {property.amenities?.slice(0, 5).map((amenity, index) => (
+                            <span key={index} className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
+                              <RiWifiLine className="mr-2 text-accent" /> {amenity.name}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </section>
@@ -339,36 +393,8 @@ export default function DetailPage() {
                     exit={{ opacity: 0 }}
                   >
                     {/* <!-- Reviews Preview --> */}
-                    <section className="mb-12" id="reviews">
-                      <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold">Guest Reviews</h2>
-                        <a href="#" className="text-accent font-medium flex items-center">
-                          View all 128 reviews
-                          <i className="ri-arrow-right-line ml-1"></i>
-                        </a>
-                      </div>
-
-                      <div className="bg-white rounded-lg p-6 mb-6">
-                        <div className="flex justify-between mb-4">
-                          <div>
-                            <h3 className="font-bold">Alexandra M.</h3>
-                            <p className="text-gray-500 text-sm">Stayed March 2024</p>
-                          </div>
-                          <Rating initialValue={4.7} />
-                        </div>
-                        <p className="text-gray-600 italic">"This loft exceeded all expectations! The location couldn't be better - right in the heart of Soho but surprisingly quiet. The apartment itself is beautifully designed with high-end finishes. The bed was incredibly comfortable and the rainfall shower was heavenly after long days of shopping and exploring. Will definitely book again!"</p>
-                      </div>
-
-                      <div className="bg-white rounded-lg p-6">
-                        <div className="flex justify-between mb-4">
-                          <div>
-                            <h3 className="font-bold">Michael T.</h3>
-                            <p className="text-gray-500 text-sm">Stayed February 2024</p>
-                          </div>
-                          <Rating initialValue={4.8} />
-                        </div>
-                        <p className="text-gray-600 italic">"Fantastic apartment in a perfect location. The space is even more impressive in person than in photos. The kitchen had everything we needed to cook meals, and the living area was great for relaxing after busy days. Only minor complaint was some street noise on weekend nights, but the soundproofing was generally good."</p>
-                      </div>
+                    <section className="bg-white" id="reviews">
+                      <Testimonial />
                     </section>
                   </motion.section>
                 )}
@@ -506,7 +532,7 @@ export default function DetailPage() {
               <div className="bg-white rounded-xl sticky top-6 p-6">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <span className="text-2xl font-bold">$285</span>
+                    <span className="text-2xl font-bold">${property.basePrice}</span>
                     <span className="text-gray-500">/ night</span>
                   </div>
                   <div className="flex">
@@ -515,29 +541,7 @@ export default function DetailPage() {
                   </div>
                 </div>
 
-                {/* <!-- Booking Form --> */}
-                <form>
-                  <BookingForm classes={true} />
-
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">$285 x 5 nights</span>
-                      <span>$1,425</span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">Cleaning fee</span>
-                      <span>$125</span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">Service fee</span>
-                      <span>$214</span>
-                    </div>
-                    <div className="flex justify-between font-bold border-t border-gray-200 pt-3 mt-3">
-                      <span>Total</span>
-                      <span>$1,764</span>
-                    </div>
-                  </div>
-                </form>
+                <BookingForm classes={true} accommodationTypeId={property.id} />
               </div>
             </div>
           </div>

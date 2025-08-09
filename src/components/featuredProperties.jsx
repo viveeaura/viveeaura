@@ -41,7 +41,7 @@ export default function FeaturedProperties() {
           {featuredProperties.map((property) => (
             <Link
               key={property.id}
-              href={`/properties/${property.id}`}
+              href={`/apartments/${property.id}`}
               className="group relative overflow-hidden rounded-lg h-80"
             >
               <img

@@ -91,18 +91,6 @@ export default function Navbar() {
               )}
             </form>
 
-            {/* Desktop Navigation Menu */}
-
-            {/* <nav className={`mt-2 text-sm border-t border-gray-100 md:p-0 p-4 ${isMobileMenuOpen ? 'block' : 'hidden md:block'}`}>
-              <ul className="md:flex md:items-center md:justify-around md:py-3 md:overflow-x-auto md:space-x-5 text-nowrap md:scrollbar-hide text-[15px] md:space-y-0 space-y-4">
-                <li><Link href="/" className="block md:py-0 py-2 text-primary font-medium">Home</Link></li>
-                <li><Link href="/aboutus" className="block md:py-0 py-2 text-gray-600 hover:text-accent">About Us</Link></li>
-                <li><Link href="#" className="block md:py-0 py-2 text-gray-600 hover:text-accent">Apartments</Link></li>
-                <li><Link href="#" className="block md:py-0 py-2 text-gray-600 hover:text-accent">Neighborhoods</Link></li>
-                <li><Link href="#" className="block md:py-0 py-2 text-gray-600 hover:text-accent">Deals</Link></li>
-              </ul>
-            </nav> */}
-
             <div className={`mt-8 pt-14 border-t border-gray-200 space-y-6 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
               <div className="flex items-center space-x-4 mb-4">
                 <div className="relative">
