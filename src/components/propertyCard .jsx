@@ -47,7 +47,7 @@ export default function PropertyCard({ property, classes }) {
         </div>
 
         {/* Property info */}
-        <Link href={`/apartments/${property.id}`}>
+        <Link href={`/apartments/details?id=${property.id}`}>
           <h3 className="font-bold mb-1 hover:text-primary">{property.title}</h3>
         </Link>
         <section className="flex flex-wrap gap-x-4 gap-y-1 text-gray-500 text-sm mb-3">
@@ -68,7 +68,7 @@ export default function PropertyCard({ property, classes }) {
           <div>
             <span className="font-bold text-lg">{property.price}</span>
           </div>
-          <Link href={`/checkout?property=${property.id}`} className="bg-accent/10 hover:bg-accent text-accent hover:text-white p-2 rounded-full transition-colors">
+          <Link href={`/apartments/details?id=${property.id}`} className="bg-accent/10 hover:bg-accent text-accent hover:text-white p-2 rounded-full transition-colors">
             <RiCalendarLine className="w-6 h-6" />
           </Link>
         </div>

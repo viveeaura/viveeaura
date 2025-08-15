@@ -2,12 +2,15 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { RiCalendarLine, RiArrowDownSLine } from 'react-icons/ri'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { useSearchParams } from 'next/navigation';
 import { checkAvailability } from '@/app/api'
 
-export default function BookingForm({ classes, accommodationTypeId }) {
+export default function BookingForm({ classes, accommodationTypeId, isSearchPage = false }) {
+  const router = useRouter()
   const [checkInDate, setCheckInDate] = useState(null)
   const [checkOutDate, setCheckOutDate] = useState(null)
   const [adults, setAdults] = useState(1)
@@ -15,6 +18,9 @@ export default function BookingForm({ classes, accommodationTypeId }) {
   const [loading, setLoading] = useState(false)
   const [availability, setAvailability] = useState(null)
   const [error, setError] = useState(null)
+
+  const searchParams = useSearchParams();
+  const rate_id = searchParams.get('id') ?? 0; // Gets `id=62`
 
   const handleCheckAvailability = async (e) => {
     e.preventDefault()
@@ -31,13 +37,25 @@ export default function BookingForm({ classes, accommodationTypeId }) {
       const availabilityData = {
         check_in_date: formatDate(checkInDate),
         check_out_date: formatDate(checkOutDate),
-        accommodation_type: accommodationTypeId,
+        accommodation_type: accommodationTypeId ?? 0,
         adults,
         children
       }
 
       const result = await checkAvailability(availabilityData)
+      localStorage.setItem('availability', JSON.stringify(result.availability) ?? [])
       setAvailability(result)
+
+      // Only redirect if not on the search page already
+      if (isSearchPage && result.availability.length === 1) {
+        // When on search page and only one property is available, go to checkout
+        router.push(`/checkout?rate_id=${rate_id}&apartment_id=${result.availability[0].accommodation_type
+          }&check_in=${formatDate(checkInDate)}&check_out=${formatDate(checkOutDate)}&adults=${adults}&children=${children}`)
+      } else if (!isSearchPage) {
+        // When not on search page, show search results
+        router.push(`/search-results?check_in_date=${formatDate(checkInDate)}&check_out_date=${formatDate(checkOutDate)}&adults=${adults}&children=${children}${accommodationTypeId ? `&accommodation_type=${accommodationTypeId}` : ''
+          }`)
+      }
     } catch (err) {
       setError('Failed to check availability. Please try again.')
       console.error('Availability check error:', err)
@@ -47,15 +65,28 @@ export default function BookingForm({ classes, accommodationTypeId }) {
   }
 
   const formatDate = (date) => {
-    return date.toISOString().split('T')[0]
+    const d = new Date(date);
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
   }
 
   const disableDates = (date) => {
     const today = new Date()
+    today.setHours(0, 0, 0, 0); // Reset time to midnight
     const twoDaysLater = new Date(today)
-    twoDaysLater.setDate(today.getDate() + 2)
+    twoDaysLater.setDate(today.getDate() + 20)
     return date >= today && date <= twoDaysLater
   }
+
+  // Update button text logic
+  const getButtonText = () => {
+    if (loading) return 'Checking...'
+    if (availability?.availability?.length === 1 && isSearchPage) return 'Reserve Now'
+    if (availability?.availability?.length > 0) return 'View Options'
+    return 'Check Availability'
+  }
+
 
   return (
     <section className={`${classes ? '' : 'bg-white py-12 -mt-8 relative z-10 mx-4 md:mx-8 rounded-lg'}`}>
@@ -66,6 +97,7 @@ export default function BookingForm({ classes, accommodationTypeId }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Check-in / Check-out</label>
             <div className="grid grid-cols-2 gap-2">
               <div className="relative">
+
                 <DatePicker
                   selected={checkInDate}
                   onChange={setCheckInDate}
@@ -140,7 +172,7 @@ export default function BookingForm({ classes, accommodationTypeId }) {
               disabled={loading}
               className={`w-full bg-accent hover:bg-accent/90 text-white px-6 py-3 font-medium rounded-lg whitespace-nowrap transition-colors ${loading ? 'opacity-70' : ''}`}
             >
-              {loading ? 'Checking...' : 'Check Availability'}
+              {getButtonText()}
             </button>
             <div className="text-center text-sm text-gray-500 my-2">
               You won't be charged yet
@@ -151,13 +183,13 @@ export default function BookingForm({ classes, accommodationTypeId }) {
             <div className="col-span-full text-red-500 text-sm mt-2">{error}</div>
           )}
 
-          {availability && (
+          {availability && isSearchPage && (
             <div className="col-span-full mt-4 p-4 bg-green-50 rounded-lg">
               <h3 className="font-bold text-green-800">Availability</h3>
               {availability.availability.length > 0 ? (
                 <div>
                   <p className="text-green-700">Available for your selected dates!</p>
-                  <p className="text-sm mt-1">Base price: ${availability.availability[0].base_price}</p>
+                  <p className="text-sm mt-1">Base price: {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format((availability.availability[0].base_price)).toLocaleString()}</p>
                 </div>
               ) : (
                 <p className="text-red-700">No availability for selected dates</p>

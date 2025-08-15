@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
-    
-    const response = await fetch('https://viveeaura.org/wp-json/mphb/v1/reviews');
+
+    const id = req.nextUrl.searchParams.get("id")
+
+    const url = id
+      ? `https://viveeaura.org/wp-json/mphb/v1/reviews/${id}`
+      : `https://viveeaura.org/wp-json/mphb/v1/reviews`;
+
+    const response = await fetch(url);
     const data = await response.json();
     return NextResponse.json({ success: true, data }, { status: 200 });
 
@@ -15,7 +21,7 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const accommodationReview = await req.json();
-    
+
     // Basic validation (customize as needed)
     if (!accommodationReview.rating || !accommodationReview.review) {
       return NextResponse.json(
@@ -23,7 +29,7 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    
+
     const response = await fetch('https://viveeaura.org/wp-json/mphb/v1/reviews', {
       method: "POST",
       headers: {
@@ -31,7 +37,7 @@ export async function POST(req) {
       },
       body: JSON.stringify(accommodationReview)
     });
-    
+
     const data = await response.json();
     return NextResponse.json({ success: true, data }, { status: 200 });
 

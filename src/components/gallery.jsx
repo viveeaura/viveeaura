@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { RiFullscreenLine, RiFullscreenExitLine, RiCloseLine, RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiFullscreenLine, RiCloseLine, RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
 
-export default function ImageGallery() {
-  const images = [
-    { id: 1, src: 'https://public.readdy.ai/ai/img_res/bc7391e00b75163867c80669bf39525c.jpg', alt: 'Luxury Soho Loft' },
-    { id: 2, src: 'https://public.readdy.ai/ai/img_res/f1abce78fbacb02e81d3dbd963d9b2cd.jpg', alt: 'Living room' },
-    { id: 3, src: 'https://public.readdy.ai/ai/img_res/69fb77b370ddd22c1e71b232dded5b2a.jpg', alt: 'Kitchen' },
-    { id: 4, src: 'https://public.readdy.ai/ai/img_res/4e1119464982756701eb93bdca871143.jpg', alt: 'Bedroom' },
-    { id: 5, src: 'https://public.readdy.ai/ai/img_res/be9f3ef1b1a5f823eae85ca3a865c44a.jpg', alt: 'Bathroom' }
-  ];
+export default function ImageGallery({images}) {
 
   const [currentImage, setCurrentImage] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -41,7 +34,7 @@ export default function ImageGallery() {
 
           <img
             src={images[currentImage].src}
-            alt={images[currentImage].alt}
+            alt={images[currentImage].title}
             className="max-h-[90vh] max-w-[90vw] object-contain"
           />
 
@@ -73,7 +66,7 @@ export default function ImageGallery() {
       <div className="relative rounded-xl overflow-hidden h-96 mb-4">
         <img
           src={images[currentImage].src}
-          alt={images[currentImage].alt}
+          alt={images[currentImage].title}
           className="w-full h-full object-cover"
         />
         <button
@@ -95,7 +88,7 @@ export default function ImageGallery() {
           >
             <img
               src={image.src}
-              alt={image.alt}
+              alt={image.title}
               className="w-full h-full object-cover"
             />
           </div>

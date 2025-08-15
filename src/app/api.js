@@ -1,5 +1,5 @@
 const credentials = btoa(`${process.env.NEXT_PUBLIC_WP_USERNAME}:${process.env.NEXT_PUBLIC_WP_PASSWORD}`);
-const baseUrl = 'https://viveeaura.org/wp-json/mphb/v1';
+const baseUrl = process.env.NEXT_PUBLIC_WP_BASE_URL;
 
 export async function fetchRates() {
   const res = await fetch(`${baseUrl}/rates`, {
@@ -20,6 +20,7 @@ export async function fetchAccommodationTypes() {
 }
 
 export async function fetchRateById(id) {
+
   const res = await fetch(`${baseUrl}/rates/${id}`, {
     headers: {
       Authorization: `Basic ${credentials}`
@@ -39,13 +40,13 @@ export async function fetchAccommodationTypeById(id) {
 
 export async function fetchReviews(accommodationTypeId = null) {
   const url = accommodationTypeId
-    ? `/api/reviews/${accommodationTypeId}`
+    ? `/api/reviews?id=${accommodationTypeId}`
     : `/api/reviews`;
 
   const res = await fetch(url, {
     headers: {
       Authorization: `Basic ${credentials}`
-    }
+    },
   });
   return await res.json();
 }
@@ -68,6 +69,75 @@ export async function checkAvailability(availabilityData) {
     headers: {
       Authorization: `Basic ${credentials}`
     }
+  });
+  return await res.json();
+}
+
+export async function createBooking(bookingData) {
+  const res = await fetch(`${baseUrl}/bookings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${credentials}`
+    },
+    body: JSON.stringify(bookingData)
+  });
+  localStorage.setItem("bookingId", res.id);
+  return await res.json();
+}
+
+export async function fetchBooking(bookingId) {
+  const res = await fetch(`${baseUrl}/bookings/${bookingId}`, {
+    headers: {
+      Authorization: `Basic ${credentials}`
+    }
+  });
+  return await res.json();
+}
+
+export async function fetchAccommodationServices(accommodationTypeId) {
+  const res = await fetch(`${baseUrl}/accommodation_types/services`, {
+    headers: {
+      Authorization: `Basic ${credentials}`
+    }
+  });
+  return await res.json();
+}
+
+export async function confirmBookingViaBridge(bookingId, gateway, txRef) {
+  const res = await fetch(`https://viveeaura.org/wp-json/mphb-bridge/v1/confirm-booking`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${credentials}`
+    },
+    body: JSON.stringify({ booking_id: bookingId, gateway, tx_ref: txRef })
+  });
+  return await res.json();
+}
+
+export async function payWithFlutterwave(bookingInfo) {
+  const res = await fetch('/api/flutterwave/initialize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      paymentIntent: bookingIntent.paymentIntent,
+      email,
+      name: 'John Doe',
+      phone_number: '08010000000',
+    }),
+  });
+  return await res.json();
+}
+
+export async function payWithPaystack(bookingInfo) {
+  const res = await fetch('/api/paystack/initialize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      paymentIntent: bookingIntent.paymentIntent,
+      email,
+    }),
   });
   return await res.json();
 }

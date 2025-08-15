@@ -68,6 +68,7 @@ export default function Footer() {
               <h3 className="font-bold text-white mb-4">Support</h3>
               <ul className="space-y-3 text-sm">
                 <li><a href="/faq" className="text-white/80 hover:text-white">FAQs</a></li>
+                <li><a href="/reviews" className="text-white/80 hover:text-white">Give us A Review</a></li>
               </ul>
             </div>
           </div>

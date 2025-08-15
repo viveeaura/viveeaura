@@ -1,292 +1,622 @@
-import { RiPencilLine } from "react-icons/ri";
+// app/checkout/page.js
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { RiPencilLine, RiArrowRightLine, RiBankCardLine, RiShieldCheckLine, RiFlutterFill } from 'react-icons/ri'
+import { createBooking, fetchRateById, fetchAccommodationTypeById, fetchBooking, payWithPaystack, payWithFlutterwave } from '@/app/api'
+import Loader from '@/components/Loader'
+import AdditionalServices from '@/components/AdditionalServices'
+import PaystackPop from '@paystack/inline-js';
 
 export default function CheckOut() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [bookingData, setBookingData] = useState(null)
+  const [activeStep, setActiveStep] = useState(1)
+  const [paymentMethod, setPaymentMethod] = useState('')
+  const [bookingIntent, setBookingIntent] = useState(null);
+
+  const [servicesData, setServicesData] = useState({
+    selectedServiceIds: [],
+    selectedServices: [],
+    total: 0
+  })
+
+  // Get booking parameters from URL
+  const rateId = searchParams.get('rate_id')
+  const checkIn = searchParams.get('check_in')
+  const checkOut = searchParams.get('check_out')
+  const adults = searchParams.get('adults')
+  const children = searchParams.get('children')
+  const apartmentId = searchParams.get('apartment_id')
+
+  const [formData, setFormData] = useState({
+    customer: {
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      country: '',
+      state: '',
+      city: '',
+      zip: '',
+      address1: ''
+    },
+    check_in_date: checkIn, // Should come from booking context
+    check_out_date: checkOut, // Should come from booking context
+    reserved_accommodations: [{
+      accommodation: 1, // Should come from booking context
+      adults: adults,
+      children: children,
+      guest_name: '',
+      services: [{
+        id: servicesData.selectedServiceIds[0],
+        adults: adults,
+        quantity: 1
+      }]
+    }],
+    coupon_code: '',
+    note: ''
+  })
+  const [loading, setLoading] = useState(false)
+
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const loadBookingData = async () => {
+      try {
+        // Fetch property details
+        const [rateDetails, accommodationDetails] = await Promise.all([
+          fetchRateById(rateId),
+          fetchAccommodationTypeById(apartmentId),
+        ])
+
+        // Calculate number of nights
+        const checkInDate = new Date(checkIn)
+        const checkOutDate = new Date(checkOut)
+        const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24))
+
+        // Calculate total price
+        const basePrice = rateDetails.season_prices?.[0]?.base_price || 0
+        const serviceFee = servicesData.total
+
+        setBookingData({
+          property: {
+            ...rateDetails,
+            ...accommodationDetails
+          },
+          dates: {
+            checkIn,
+            checkOut,
+            nights
+          },
+          guests: {
+            adults,
+            children
+          },
+          pricing: {
+            basePrice,
+            serviceFee,
+            total: basePrice * nights + serviceFee
+          }
+        })
+
+      } catch (error) {
+        console.error('Error loading booking data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (rateId && apartmentId) loadBookingData()
+
+  }, [rateId, checkIn, checkOut, adults, children, router, servicesData])
+
+  useEffect(() => {
+    const previousBooking = async () => {
+      const bookingId = localStorage.getItem("bookingId");
+      if (bookingId) {
+        const initialBooking = await fetchBooking(bookingId)
+        if (initialBooking.status === "pending-payment") {
+          redirectToPaystack(initialBooking);
+        }
+      }
+    }
+    previousBooking()
+  }, []);
+
+  const redirectToPaystack = (booking) => {
+    const handler = PaystackPop.setup({
+      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+      email: booking.customer.email,
+      amount: booking.total_price * 100, // kobo
+      currency: "NGN",
+      callback: async (response) => {
+        // Save payment reference & confirm booking
+        await confirmBookingViaBridge(booking.id, 'paystack', response.reference);
+      },
+      onClose: () => alert("Payment cancelled")
+    });
+    handler.openIframe();
+  };
+
+  const handleServiceSelection = (data) => {
+    setServicesData(data)
+    // Update form data with selected services
+    setFormData(prev => ({
+      ...prev,
+      reserved_accommodations: [{
+        ...prev.reserved_accommodations[0],
+        services: data.selectedServiceIds
+      }]
+    }))
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    if (name.includes('customer.')) {
+      const field = name.split('.')[1]
+      setFormData(prev => ({
+        ...prev,
+        customer: {
+          ...prev.customer,
+          [field]: value
+        }
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
+    }
+  }
+
+  const handleBooking = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      const booking = await createBooking({
+        ...formData,
+        status: 'pending-payment' // Initial status
+      })
+
+      setBookingIntent(booking);
+      setActiveStep(2)
+    } catch (err) {
+      setError('Failed to process booking. Please try again.')
+      console.error('Booking error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePayment = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Handle payment based on selected method
+      if (paymentMethod === 'flutter_wave') {
+        // Redirect to flutterwave
+        const data = await payWithFlutterwave()
+        if (data?.link) {
+          location.href = data.link;
+        } else {
+          alert(data?.error || 'Could not start Flutterwave');
+        }
+      } else if (paymentMethod === 'paystack') {
+        // Process Paystack payment
+        const data = await payWithPaystack()
+        if (data?.authorization_url) {
+          location.href = data.authorization_url;
+        } else {
+          alert(data?.error || 'Could not start Paystack');
+        }
+      }
+    } catch (err) {
+      setError('Failed to process payment. Please try again.')
+      console.error('payment error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const nextStep = () => {
+    setActiveStep(prev => Math.min(prev + 1, 3))
+    scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (loading) {
+    return (<Loader />)
+  }
+
+  if (!bookingData) {
+    return (
+      <section className="pt-28">
+        <div className="container mx-auto px-4 py-16 max-w-7xl text-center">
+          <h2 className="text-2xl font-bold mb-4">Booking Not Found</h2>
+          <p className="mb-6">We couldn't retrieve your booking details.</p>
+          <button
+            onClick={() => router.push('/')}
+            className="bg-accent hover:bg-accent/90 text-white px-6 py-3 rounded-lg"
+          >
+            Back to Home
+          </button>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section className="pt-20">
-      {/* <!-- Progress Steps --> */}
-      <section class="bg-white border-b border-gray-100">
-        <div class="container mx-auto px-4 py-8 max-w-7xl">
-          <div class="flex justify-between max-w-3xl mx-auto">
-            {/* <!-- Step 1 --> */}
-            <div class="checkout-step active flex flex-col items-center border-b-2 border-accent pb-2 w-1/3">
-              <div class="step-number w-8 h-8 flex items-center justify-center bg-accent text-white rounded-full mb-2 font-medium">1</div>
-              <span class="text-sm font-medium">Your Details</span>
-            </div>
-
-            {/* <!-- Step 2 --> */}
-            <div class="checkout-step flex flex-col items-center border-b-2 border-gray-200 pb-2 w-1/3">
-              <div class="step-number w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full mb-2 font-medium">2</div>
-              <span class="text-sm text-gray-500">Payment</span>
-            </div>
-
-            {/* <!-- Step 3 --> */}
-            <div class="checkout-step flex flex-col items-center border-b-2 border-gray-200 pb-2 w-1/3">
-              <div class="step-number w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full mb-2 font-medium">3</div>
-              <span class="text-sm text-gray-500">Confirmation</span>
-            </div>
+    <section className="pt-28">
+      {/* Progress Steps */}
+      <section className="bg-white border-b border-gray-100">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex justify-between max-w-3xl mx-auto">
+            {[1, 2, 3].map((step) => (
+              <div
+                key={step}
+                className={`checkout-step flex flex-col items-center border-b-2 ${activeStep >= step ? 'border-accent' : 'border-gray-200'} pb-2 w-1/3`}
+              >
+                <div className={`step-number w-8 h-8 flex items-center justify-center ${activeStep >= step ? 'bg-accent text-white' : 'bg-gray-200'} rounded-full mb-2 font-medium`}>
+                  {step}
+                </div>
+                <span className={`text-sm ${activeStep >= step ? 'font-medium' : 'text-gray-500'}`}>
+                  {step === 1 ? 'Your Details' : step === 2 ? 'Payment' : 'Confirmation'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* <!-- Main Content --> */}
-      <main class="bg-light">
-        <div class="flex flex-col lg:flex-row gap-8 container mx-auto px-4 py-16 max-w-7xl">
-          {/* <!-- Left Column - Booking Form --> */}
-          <div class="lg:w-2/3">
-            <h2 class="text-2xl font-bold mb-6">Complete Your Booking</h2>
+      {/* Main Content */}
+      <main className="bg-light">
+        <div className="flex flex-col lg:flex-row gap-8 container mx-auto px-4 py-16 max-w-7xl">
 
-            {/* <!-- Property Summary --> */}
-            <div class="bg-white rounded-lg p-6 mb-8">
-              <div class="flex flex-col sm:flex-row gap-6">
-                <div class="w-full sm:w-1/3">
-                  <img src="https://public.readdy.ai/ai/img_res/bc7391e00b75163867c80669bf39525c.jpg" alt="Luxury Soho Loft" class="w-full h-auto rounded-lg" />
-                </div>
-                <div class="w-full sm:w-2/3">
-                  <h3 class="text-xl font-bold mb-2">Luxury Soho Loft</h3>
-                  <p class="text-gray-600 mb-4">Soho, Manhattan</p>
+          {/* Left Column - Booking Form */}
+          <div className="lg:w-2/3">
+            <h2 className="text-2xl font-bold mb-6">Complete Your Booking</h2>
 
-                  <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p class="text-sm text-gray-500">Check-in</p>
-                      <p class="font-medium">Fri, Jun 15, 2024</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-gray-500">Check-out</p>
-                      <p class="font-medium">Wed, Jun 20, 2024</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-gray-500">Guests</p>
-                      <p class="font-medium">2 adults</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-gray-500">Nights</p>
-                      <p class="font-medium">5</p>
-                    </div>
-                  </div>
+            <form onSubmit={handleBooking}>
+              {/* Step 1: Guest Information */}
+              {activeStep === 1 && (
+                <>
+                  {/* Property Summary */}
+                  <div className="bg-white rounded-lg p-6 mb-8">
+                    <div className="flex flex-col sm:flex-row gap-6">
+                      <div className="w-full sm:w-1/3">
+                        <img
+                          src={bookingData.property.images?.[0]?.src}
+                          alt={bookingData.property.title}
+                          className="w-full h-auto rounded-lg"
+                        />
+                      </div>
+                      <div className="w-full sm:w-2/3">
+                        <h3 className="text-xl font-bold mb-2">{bookingData.property.title}</h3>
+                        <p className="text-gray-600 mb-4">{bookingData.property.view || 'Location not specified'}</p>
 
-                  <a href="/apartments/1" class="text-accent font-medium text-sm flex items-center">
-                    <RiPencilLine class="mr-1" /> Edit booking details
-                  </a>
-                </div>
-              </div>
-            </div>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <p className="text-sm text-gray-500">Check-in</p>
+                            <p className="font-medium">
+                              {new Date(bookingData.dates.checkIn).toLocaleDateString('en-NG', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Check-out</p>
+                            <p className="font-medium">
+                              {new Date(bookingData.dates.checkOut).toLocaleDateString('en-NG', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Guests</p>
+                            <p className="font-medium">
+                              {bookingData.guests.adults} {bookingData.guests.adults === '1' ? 'adult' : 'adults'}
+                              {bookingData.guests.children !== '0' && `, ${bookingData.guests.children} ${bookingData.guests.children === '1' ? 'child' : 'children'}`}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Nights</p>
+                            <p className="font-medium">{bookingData.dates.nights}</p>
+                          </div>
+                        </div>
 
-            {/* <!-- Guest Information --> */}
-            <div class="bg-white rounded-lg p-6 mb-8">
-              <h3 class="text-xl font-bold mb-6">Guest Information</h3>
-
-              <form>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name*</label>
-                    <input type="text" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" required />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name*</label>
-                    <input type="text" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" required />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
-                    <input type="email" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" required />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number*</label>
-                    <input type="tel" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" required />
-                  </div>
-                </div>
-
-                <div class="mb-6">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Special Requests (Optional)</label>
-                  <textarea class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent h-24" placeholder="Early check-in, late check-out, etc."></textarea>
-                </div>
-
-                <div class="flex items-center mb-6">
-                  <input type="checkbox" id="create-account" class="mr-2 rounded border-gray-300 text-accent focus:ring-accent" />
-                  <label for="create-account" class="text-sm text-gray-700">Create a Vivee account for faster booking next time</label>
-                </div>
-              </form>
-            </div>
-
-            {/* <!-- Payment Method --> */}
-            <div class="bg-white rounded-lg p-6 mb-8">
-              <h3 class="text-xl font-bold mb-6">Payment Method</h3>
-
-              <div class="space-y-4 mb-6">
-                {/* <!-- Credit Card --> */}
-                <div class="payment-method selected p-4 border-2 border-accent rounded-lg cursor-pointer bg-pale">
-                  <div class="flex items-center">
-                    <div class="w-10 h-10 flex items-center justify-center bg-white rounded-full mr-4">
-                      <i class="ri-bank-card-line text-accent"></i>
-                    </div>
-                    <span class="font-medium">Credit/Debit Card</span>
-                  </div>
-                </div>
-
-                {/* <!-- PayPal --> */}
-                <div class="payment-method p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-accent">
-                  <div class="flex items-center">
-                    <div class="w-10 h-10 flex items-center justify-center bg-white rounded-full mr-4">
-                      <i class="ri-paypal-line text-blue-500"></i>
-                    </div>
-                    <span class="font-medium">PayPal</span>
-                  </div>
-                </div>
-
-                {/* <!-- Bank Transfer --> */}
-                <div class="payment-method p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-accent">
-                  <div class="flex items-center">
-                    <div class="w-10 h-10 flex items-center justify-center bg-white rounded-full mr-4">
-                      <i class="ri-bank-line text-green-500"></i>
-                    </div>
-                    <span class="font-medium">Bank Transfer</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* <!-- Credit Card Form (shown when credit card selected) --> */}
-              <div class="bg-gray-50 p-6 rounded-lg">
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Card Number*</label>
-                  <div class="relative">
-                    <input type="text" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" placeholder="1234 5678 9012 3456" required />
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <div class="flex space-x-2">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/visa/visa-original.svg" class="w-6 h-4" alt="Visa" />
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mastercard/mastercard-original.svg" class="w-6 h-4" alt="Mastercard" />
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg" class="w-6 h-4" alt="Apple Pay" />
+                        <button
+                          onClick={() => router.push(`/apartments/details?id=${rateId}`)}
+                          className="text-accent font-medium text-sm flex items-center"
+                        >
+                          <RiPencilLine className="mr-1" /> Edit booking details
+                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Expiration Date*</label>
-                    <input type="text" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" placeholder="MM/YY" required />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Security Code*</label>
-                    <div class="relative">
-                      <input type="text" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" placeholder="CVC" required />
-                      <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                        <i class="ri-question-line text-gray-400 cursor-pointer" title="3-digit code on back of card"></i>
+                  <AdditionalServices
+                    accommodationTypeId={apartmentId}
+                    onSelectionChange={handleServiceSelection}
+                  />
+
+                  <div className="bg-white rounded-lg p-6 mb-8">
+                    <h3 className="text-xl font-bold mb-6">Guest Information</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">First Name*</label>
+                        <input
+                          type="text"
+                          name="customer.first_name"
+                          value={formData.customer.first_name}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Last Name*</label>
+                        <input
+                          type="text"
+                          name="customer.last_name"
+                          value={formData.customer.last_name}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                        <input
+                          type="email"
+                          name="customer.email"
+                          value={formData.customer.email}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number*</label>
+                        <input
+                          type="tel"
+                          name="customer.phone"
+                          value={formData.customer.phone}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                        <input
+                          type="text"
+                          name="customer.country"
+                          value={formData.customer.country}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                        <input
+                          type="text"
+                          name="customer.state"
+                          value={formData.customer.state}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                        <input
+                          type="text"
+                          name="customer.city"
+                          value={formData.customer.city}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Coupon Code</label>
+                        <input
+                          type="text"
+                          name="coupon_code"
+                          value={formData.coupon_code}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && activeStep < 3) {
+                              e.preventDefault();
+                              nextStep();
+                            }
+                          }}
+                          className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                        />
                       </div>
                     </div>
+
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Special Requests (Optional)</label>
+                      <textarea
+                        name="note"
+                        value={formData.note}
+                        onChange={handleInputChange}
+                        className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent h-24"
+                        placeholder="Early check-in, late check-out, etc."
+                      ></textarea>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className={`bg-accent w-full block justify-end hover:bg-accent/90 text-white px-8 py-3 font-medium rounded-lg ${loading ? 'opacity-70' : ''}`}
+                    >
+                      {loading ? 'Creating booking…' : 'Create Booking'}
+                    </button>
                   </div>
+                </>
+              )}
+            </form>
+
+            {/* Step 2: Payment Method */}
+            {activeStep === 2 && (
+              <div className="bg-white rounded-lg p-6 mb-8">
+                <h3 className="text-xl font-bold mb-6">Payment Method</h3>
+
+                <div className="space-y-4 mb-6">
+                  {[
+                    { id: 'flutter_wave', label: 'Flutter Wave', icon: <RiFlutterFill className="text-green-500" /> },
+                    { id: 'paystack', label: 'Paystack', icon: <RiBankCardLine className="text-purple-500" /> }
+                  ].map((method) => (
+                    <div
+                      key={method.id}
+                      className={`payment-method p-4 border-2 rounded-lg cursor-pointer ${paymentMethod === method.id ? 'border-accent bg-pale' : 'border-gray-200 hover:border-accent'}`}
+                      onClick={() => setPaymentMethod(method.id)}
+                    >
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 flex items-center justify-center bg-white rounded-full mr-4">
+                          {method.icon}
+                        </div>
+                        <span className="font-medium">{method.label}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Name on Card*</label>
-                  <input type="text" class="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" required />
-                </div>
-
-                <div class="flex items-center">
-                  <input type="checkbox" id="save-card" class="mr-2 rounded border-gray-300 text-accent focus:ring-accent" />
-                  <label for="save-card" class="text-sm text-gray-700">Save this card for future payments</label>
-                </div>
+                <button
+                  type="button"
+                  onClick={handlePayment}
+                  className="bg-accent hover:bg-accent/90 text-white px-8 py-3 font-medium rounded-lg"
+                >
+                  {loading ? 'Processing...' : `Continue to Payment`} <RiArrowRightLine className="ml-2 inline" />
+                </button>
               </div>
-            </div>
+            )}
 
-            {/* <!-- Terms and Conditions --> */}
-            <div class="bg-white rounded-lg p-6 mb-8">
-              <h3 class="text-xl font-bold mb-4">Terms and Conditions</h3>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between">
 
-              <div class="border border-gray-200 rounded-lg p-4 mb-4 max-h-48 overflow-y-auto">
-                <h4 class="font-bold mb-2">Cancellation Policy</h4>
-                <p class="text-gray-600 text-sm mb-4">Free cancellation up to 14 days before check-in. After that, cancel up to 24 hours before check-in and get a 50% refund (minus service fees).</p>
-
-                <h4 class="font-bold mb-2">House Rules</h4>
-                <ul class="text-gray-600 text-sm space-y-2 mb-4">
-                  <li class="flex items-start">
-                    <i class="ri-check-line text-accent mr-2 mt-1"></i>
-                    <span>No smoking</span>
-                  </li>
-                  <li class="flex items-start">
-                    <i class="ri-check-line text-accent mr-2 mt-1"></i>
-                    <span>No parties or events</span>
-                  </li>
-                  <li class="flex items-start">
-                    <i class="ri-check-line text-accent mr-2 mt-1"></i>
-                    <span>Pets allowed with prior approval (fee applies)</span>
-                  </li>
-                  <li class="flex items-start">
-                    <i class="ri-check-line text-accent mr-2 mt-1"></i>
-                    <span>Quiet hours after 10 PM</span>
-                  </li>
-                </ul>
-
-                <h4 class="font-bold mb-2">Privacy Policy</h4>
-                <p class="text-gray-600 text-sm">Your personal information will be used to process your booking and for no other purpose. We will not share your details with third parties without your consent.</p>
-              </div>
-
-              <div class="flex items-start">
-                <input type="checkbox" id="agree-terms" class="mt-1 mr-2 rounded border-gray-300 text-accent focus:ring-accent" required />
-                <label for="agree-terms" class="text-sm text-gray-700">I agree to the UrbanStay Terms of Service, Privacy Policy, and cancellation policy*</label>
-              </div>
-            </div>
-
-            {/* <!-- Navigation Buttons --> */}
-            <div class="flex justify-between">
-              <a href="#" class="bg-white border border-gray-300 text-gray-700 hover:border-accent hover:text-accent px-6 py-3 font-medium !rounded-button">
-                <i class="ri-arrow-left-line mr-2"></i> Back
-              </a>
-              <button class="bg-accent hover:bg-accent/90 text-white px-8 py-3 font-medium !rounded-button">
-                Continue to Payment <i class="ri-arrow-right-line ml-2"></i>
+              <button
+                type="button"
+                onClick={nextStep}
+                className="bg-accent hover:bg-accent/90 text-white px-8 py-3 font-medium rounded-lg"
+              >
+                {loading ? 'Processing...' : `Continue to Payment`} <RiArrowRightLine className="ml-2 inline" />
               </button>
+
             </div>
           </div>
 
-          {/* <!-- Right Column - Booking Summary --> */}
-          <div class="lg:w-1/3">
-            <div class="bg-white rounded-xl sticky top-6 p-6">
-              <h3 class="text-xl font-bold mb-6">Booking Summary</h3>
+          {/* Right Column - Booking Summary */}
+          <div className="lg:w-1/3">
+            <div className="bg-white rounded-xl sticky top-6 p-6">
+              <h3 className="text-xl font-bold mb-6">Booking Summary</h3>
 
-              <div class="border-b border-gray-200 pb-4 mb-4">
-                <h4 class="font-bold mb-2">Luxury Soho Loft</h4>
-                <p class="text-gray-600 text-sm mb-2">Soho, Manhattan</p>
-                <p class="text-gray-600 text-sm">Jun 15 - Jun 20, 2024 (5 nights)</p>
+              <div className="border-b border-gray-200 pb-4 mb-4">
+                <h4 className="font-bold mb-2">{bookingData.property.title}</h4>
+                <p className="text-gray-600 text-sm mb-2">{bookingData.property.view || 'Location not specified'}</p>
+                <p className="text-gray-600 text-sm">
+                  {new Date(formData.check_in_date).toLocaleDateString()} - {new Date(formData.check_out_date).toLocaleDateString()}
+                </p>
               </div>
 
-              <div class="border-b border-gray-200 pb-4 mb-4">
-                <div class="flex justify-between mb-2">
-                  <span class="text-gray-600">$285 x 5 nights</span>
-                  <span>$1,425</span>
+              {/* <div className="border-b border-gray-200 pb-4 mb-4">
+                <div className="flex justify-between mb-2">
+                  <span className="text-gray-600">{new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN'
+                  }).format(bookingData?.pricing?.basePrice)} x {bookingData?.dates?.nights} night(s)</span>
+                  <span>{new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN'
+                  }).format(bookingData?.pricing?.basePrice * bookingData?.dates?.nights)}</span>
                 </div>
-                <div class="flex justify-between mb-2">
-                  <span class="text-gray-600">Cleaning fee</span>
+                <div className="flex justify-between mb-2">
+                  <span className="text-gray-600">Cleaning fee</span>
                   <span>$125</span>
                 </div>
-                <div class="flex justify-between mb-2">
-                  <span class="text-gray-600">Service fee</span>
+                <div className="flex justify-between mb-2">
+                  <span className="text-gray-600">Service fee</span>
                   <span>$214</span>
                 </div>
-                <div class="flex justify-between mb-2">
-                  <span class="text-gray-600">Taxes</span>
-                  <span>$143</span>
+                <div className="flex justify-between mb-2">
+                  <span className="text-gray-600">Taxes</span>
+                  <span>Are applicable</span>
                 </div>
-              </div>
+              </div> */}
 
-              <div class="flex justify-between font-bold text-lg border-b border-gray-200 pb-4 mb-4">
+              <div className="flex justify-between font-bold text-lg border-b border-gray-200 pb-4 mb-4">
                 <span>Total</span>
-                <span>$1,907</span>
+                <span>{new Intl.NumberFormat('en-NG', {
+                  style: 'currency',
+                  currency: 'NGN'
+                }).format(bookingData?.pricing?.total)}</span>
               </div>
 
-              <div class="bg-pale rounded-lg p-4 mb-6">
-                <h4 class="font-bold mb-2 flex items-center">
-                  <i class="ri-shield-check-line text-accent mr-2"></i>
+              <div className="bg-pale rounded-lg p-4 mb-6">
+                <h4 className="font-bold mb-2 flex items-center">
+                  <RiShieldCheckLine className="text-accent mr-2" />
                   Booking Protection
                 </h4>
-                <p class="text-gray-600 text-sm">Your booking is protected by UrbanStay's comprehensive guarantee covering cancellations, misrepresentations, and travel issues.</p>
-              </div>
-
-              <div class="text-center text-sm text-gray-500">
-                <p class="mb-1">Need help with your booking?</p>
-                <a href="#" class="text-accent font-medium">Contact our support team</a>
+                <p className="text-gray-600 text-sm">Your booking is protected by our comprehensive guarantee.</p>
               </div>
             </div>
           </div>
         </div>
       </main>
-    </section>
+    </section >
   )
 }

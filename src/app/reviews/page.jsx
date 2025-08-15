@@ -109,7 +109,11 @@ export default function ReviewPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center h-screen items-center"><Loader /></div>;
+    return (
+      <main>
+        <Loader />
+      </main>
+    )
   }
 
   return (

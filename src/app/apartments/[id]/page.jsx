@@ -2,23 +2,24 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { fetchRateById, fetchAccommodationTypeById, fetchReviews, checkAvailability } from '@/app/api'
+import { fetchRateById, fetchAccommodationTypeById, fetchReviews } from '@/app/api'
 import ImageGallery from '@/components/gallery'
 import Rating from '@/components/rating'
 import BookingForm from '@/components/bookingForm'
 import Testimonial from '@/components/testimonies'
-// import PropertyCard from '@/components/propertyCard'
-import { RiHome4Line, RiHotelBedLine, RiShowersLine, RiRulerLine, RiUserLine, RiWifiLine, RiAirplayLine, RiWindyLine, RiCupLine, RiRestaurantLine, RiCheckLine, RiBrushLine, RiLuggageDepositLine, RiCarLine, RiBikeLine, RiDoorLockLine, RiCalendarCheckLine, RiKeyLine, RiGroupLine, RiChat3Line, RiPhoneLine } from 'react-icons/ri'
+
+import { RiHome4Line, RiHotelBedLine, RiShowersLine, RiRulerLine, RiUserLine, RiRestaurantLine, RiCheckLine, RiBrushLine, RiCalendarCheckLine, RiKeyLine, RiGroupLine, RiChat3Line, RiPhoneLine, RiMapPinLine, RiCheckDoubleLine } from 'react-icons/ri'
 import TrendingProperties from '@/components/trendingProperties'
+import { useSearchParams } from 'next/navigation';
+import Custom404 from '@/app/404/page'
+import Loader from '@/components/loader'
 
 export default function DetailPage() {
 
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('Overview')
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
-  const [number, setNumber] = useState('')
 
   const tabs = [
     { id: 'Overview', label: 'Overview', href: '#overview' },
@@ -28,34 +29,40 @@ export default function DetailPage() {
     { id: 'Sales', label: 'Contact Sales', href: '#sales' }
   ];
 
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id'); // Gets `id=62`
+
+  if (!id) return <Custom404 />;
+
   useEffect(() => {
     const loadProperty = async () => {
-      const baseUrl = window.location.href;
-      const pathParts = baseUrl.split('/'); // Split the URL by '/'
-      setNumber(pathParts[pathParts.length - 1]); // Get the last part
 
       try {
         setLoading(true)
-        setError(null)
 
-        const rate = await fetchRateById(number)
-
-        if (!rate || !rate.accommodation_type_id) {
-          throw new Error('Property not found')
-        }
-
+        const rate = await fetchRateById(id)
+        if (rate?.data?.status === 404) return false
         // Fetch accommodation data
-        const accommodation = await fetchAccommodationTypeById(rate.accommodation_type_id)
+        const accommodation = await fetchAccommodationTypeById(rate?.accommodation_type_id)
+        const review = await fetchReviews(rate?.accommodation_type_id)
+
+        const reviewLength = review?.data?.length
+
+        // Calculate average rating
+        const avgRating = reviewLength > 0
+          ? review?.data?.reduce((sum, review) => sum + parseInt(review.rating), 0) / reviewLength
+          : 0 // Default if no reviews
 
         // Combine the data
         setProperty({
           ...rate,
           ...accommodation,
+          rating: avgRating,
+          numbersOfReviews: reviewLength,
           basePrice: rate.season_prices?.[0]?.base_price || 0,
           totalCapacity: accommodation.adults + accommodation.children
         })
       } catch (error) {
-        setError(error.message)
         console.error('Error loading property:', error)
       } finally {
         setLoading(false)
@@ -63,7 +70,7 @@ export default function DetailPage() {
     }
 
     loadProperty()
-  }, [number])
+  }, [id])
 
   useEffect(() => {
     const activeElement = document.querySelector('.active-tab')
@@ -77,32 +84,16 @@ export default function DetailPage() {
 
   if (loading) {
     return (
-      <section className="pt-24 bg-light min-h-screen">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/3 mb-8"></div>
-            <div className="h-96 bg-gray-200 rounded mb-8"></div>
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  if (error) {
-    return (
-      <section className="pt-24 bg-light min-h-screen">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <p className="text-red-500">{error}</p>
-        </div>
-      </section>
+      <main>
+        <Loader />
+      </main>
     )
   }
 
   if (!property) {
     return (
-      <section className="pt-24 bg-light min-h-screen">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <section className="pt-24 bg-light">
+        <div className="container min-h-[50vh] mx-auto px-4 py-8 max-w-7xl flex justify-center items-center">
           <p>Property not found</p>
         </div>
       </section>
@@ -110,19 +101,22 @@ export default function DetailPage() {
   }
 
   return (
-    <section className="pt-24">
+    <section>
       {/* <!-- Property Header --> */}
-      <div>{console.log(property)}</div>
-      <section className='bg-light'>
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <h1 className="md:text-4xl text-2xl font-bold">{property.title}</h1>
-          <div className="flex items-center mt-2">
-            <Rating initialValue={4.7} className="mr-2" />
-            <span className="text-gray-600 text-sm">4.7 (128 reviews)</span>
-            <span className="mx-3 text-gray-300">|</span>
-            <span className="text-gray-600 text-sm flex items-center">
-              <RiMapPinLine className="mr-2" /> {property.view || 'Location not specified'}
-            </span>
+      <section className='bg-light pt-28'>
+        <div className="container mx-auto px-4 max-w-7xl">
+          <h1 className="md:text-4xl text-2xl font-bold">{property?.title}</h1>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 overflow-auto mb-4">
+            <div className='flex items-center mt-2'>
+              <Rating initialValue={property?.rating} className="mr-2" />
+              <span className="text-gray-600 text-sm">{property?.rating} ({property?.numbersOfReviews} review(s))</span>
+            </div>
+            <div className='flex items-center mt-2'>
+              <span className="mx-3 text-gray-300 hidden sm:block">|</span>
+              <span className="text-gray-600 text-sm flex items-center">
+                <RiMapPinLine className="mr-2" /> {property?.view || 'Location not specified'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -140,13 +134,13 @@ export default function DetailPage() {
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
-                      className={`py-3 relative text-sm font-medium transition-colors ${activeTab === tab.id ? 'text-accent active-tab' : 'text-gray-600 hover:text-accent'}`}
+                      className={`py-3 relative text-sm font-medium transition-colors ${activeTab === tab.id ? 'text-accent border-b border-accent active-tab' : 'text-gray-600 hover:text-accent '}`}
                       onClick={() => setActiveTab(tab.id)}
                     >
                       <span className="relative z-10">{tab.label}</span>
                       {activeTab === tab.id && (
                         <motion.div
-                          className="absolute bottom-0 h-0.5 bg-accent"
+                          className="absolute bottom-0 h-0.5"
                           initial={false}
                           animate={{
                             left: indicatorStyle.left,
@@ -172,7 +166,7 @@ export default function DetailPage() {
                     {/* <!-- Overview Section --> */}
                     <section className="mb-12">
                       <h2 className="text-2xl font-bold mb-4">{property.title}</h2>
-                      <p className="text-gray-600 mb-6">{property.description || 'No description available'}</p>
+                      <p className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: property.description || 'No description available' }}></p>
 
                       <div className="grid grid-cols-2 gap-6 mb-8">
                         <div className="flex items-start">
@@ -186,11 +180,11 @@ export default function DetailPage() {
                         </div>
                         <div className="flex items-start">
                           <div className="w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-4 mt-1">
-                            <RiShowersLine className="text-accent" />
+                            <RiHome4Line className="text-accent" />
                           </div>
                           <div>
-                            <h3 className="font-bold mb-1">Bathroom</h3>
-                            <p className="text-gray-600">Spa-like with rainfall shower</p>
+                            <h3 className="font-bold mb-1">Category</h3>
+                            <p className="text-gray-600">{property?.categories[0]?.name} Room(s)</p>
                           </div>
                         </div>
                         <div className="flex items-start">
@@ -212,174 +206,69 @@ export default function DetailPage() {
                           </div>
                         </div>
                       </div>
-
-                      <div className="border-t border-b border-gray-200 py-6 mb-6">
-                        <div className="flex flex-wrap gap-4">
-                          {property.amenities?.slice(0, 5).map((amenity, index) => (
-                            <span key={index} className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
-                              <RiWifiLine className="mr-2 text-accent" /> {amenity.name}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
                     </section>
 
                     {/* <!-- Room Features Section --> */}
                     <section className="mb-12">
-                      <h2 className="text-2xl font-bold mb-6">Room Features</h2>
+                      <h2 className="text-2xl font-bold mb-6">Amenities</h2>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1">
+                        <div className='flex gap-x-6 gap-y-1 overflow-auto text-nowrap'>
                           <h3 className="font-bold mb-3 flex items-center">
                             <div className="w-8 h-8 flex items-center justify-center bg-accent/10 rounded-full mr-3">
                               <RiHome4Line className="text-accent" />
                             </div>
                             Living Area
                           </h3>
-                          <ul className="text-gray-600 space-y-2">
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Open concept living/dining area</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Designer furnishings</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>55" 4K Smart TV with streaming</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Soundproof windows</span>
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div>
                           <h3 className="font-bold mb-3 flex items-center">
                             <div className="w-8 h-8 flex items-center justify-center bg-accent/10 rounded-full mr-3">
                               <RiRestaurantLine className="text-accent" />
                             </div>
                             Kitchen
                           </h3>
-                          <ul className="text-gray-600 space-y-2">
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Stainless steel appliances</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Gas range and oven</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Full set of cookware and dinnerware</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Nespresso coffee machine</span>
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div>
                           <h3 className="font-bold mb-3 flex items-center">
                             <div className="w-8 h-8 flex items-center justify-center bg-accent/10 rounded-full mr-3">
                               <RiHotelBedLine className="text-accent" />
                             </div>
                             Bedroom
                           </h3>
-                          <ul className="text-gray-600 space-y-2">
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>King-size bed with premium mattress</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Blackout curtains</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Walk-in closet</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Dresser and nightstands</span>
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div>
                           <h3 className="font-bold mb-3 flex items-center">
                             <div className="w-8 h-8 flex items-center justify-center bg-accent/10 rounded-full mr-3">
                               <RiShowersLine className="text-accent" />
                             </div>
                             Bathroom
                           </h3>
-                          <ul className="text-gray-600 space-y-2">
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Rainfall showerhead</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Heated floors</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Premium toiletries</span>
-                            </li>
-                            <li className="flex items-start">
-                              <RiCheckLine className="text-accent mr-2 mt-1" />
-                              <span>Hair dryer</span>
-                            </li>
-                          </ul>
                         </div>
+                        {property.amenities.length > 0 ? 
+                          <div className="border-t border-b border-gray-200">
+                            <div className="flex flex-wrap gap-4">
+                              {property.amenities?.map((amenity, index) => (
+                                <span key={index} className="bg-white border border-gray-200 rounded-full px-3 py-1 text-sm flex items-center">
+                                  <RiCheckDoubleLine className="mr-2 text-accent" /> {amenity.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          :
+                          <h4>No Amenities</h4> 
+                      }
+                        
                       </div>
                     </section>
 
                     {/* <!-- Services & Amenities --> */}
                     <section className="mb-12">
-                      <h2 className="text-2xl font-bold mb-6">Services & Amenities</h2>
+                      <h2 className="text-2xl font-bold mb-6">Services</h2>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
-                          <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
-                            <RiBrushLine />
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 overflow-auto">
+                        {property.services.map((item, index) => (
+                          <div key={index} className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
+                            <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
+                              <RiBrushLine />
+                            </div>
+                            <span className='text-nowrap'>{item.title}</span>
                           </div>
-                          <span>Weekly cleaning</span>
-                        </div>
-                        <div className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
-                          <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
-                            <RiUserLine />
-                          </div>
-                          <span>Concierge service</span>
-                        </div>
-                        <div className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
-                          <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
-                            <RiLuggageDepositLine />
-                          </div>
-                          <span>Luggage storage</span>
-                        </div>
-                        <div className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
-                          <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
-                            <RiCarLine />
-                          </div>
-                          <span>Parking available</span>
-                        </div>
-                        <div className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
-                          <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
-                            <RiBikeLine />
-                          </div>
-                          <span>Bike storage</span>
-                        </div>
-                        <div className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
-                          <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
-                            <RiDoorLockLine />
-                          </div>
-                          <span>Secure building</span>
-                        </div>
+                        ))}
                       </div>
                     </section>
                   </motion.section>
@@ -393,7 +282,7 @@ export default function DetailPage() {
                     exit={{ opacity: 0 }}
                   >
                     {/* <!-- Reviews Preview --> */}
-                    <section className="bg-white" id="reviews">
+                    <section className="bg-white text-nowrap overflow-auto" id="reviews">
                       <Testimonial />
                     </section>
                   </motion.section>
@@ -411,32 +300,14 @@ export default function DetailPage() {
                       <h3 className="font-bold mb-4">Pricing Plans</h3>
 
                       <div className="space-y-4">
-                        <div className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-bold">Monthly Rate</h4>
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Best Value</span>
-                          </div>
-                          <p className="text-gray-600 text-sm mb-3">Perfect for extended stays</p>
-                          <div className="flex items-end">
-                            <span className="text-2xl font-bold">$4,500</span>
-                            <span className="text-gray-500 text-sm ml-1">/month</span>
-                          </div>
-                        </div>
-
-                        <div className="border border-gray-200 rounded-lg p-4">
-                          <h4 className="font-bold mb-2">Weekly Rate</h4>
-                          <p className="text-gray-600 text-sm mb-3">Ideal for business trips</p>
-                          <div className="flex items-end">
-                            <span className="text-2xl font-bold">$1,400</span>
-                            <span className="text-gray-500 text-sm ml-1">/week</span>
-                          </div>
-                        </div>
-
+                        {/* Nightly Rate (base price) */}
                         <div className="border border-gray-200 rounded-lg p-4">
                           <h4 className="font-bold mb-2">Nightly Rate</h4>
                           <p className="text-gray-600 text-sm mb-3">Great for short visits</p>
                           <div className="flex items-end">
-                            <span className="text-2xl font-bold">$285</span>
+                            <span className="text-2xl font-bold">
+                              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format((property.basePrice))?.toLocaleString()}
+                            </span>
                             <span className="text-gray-500 text-sm ml-1">/night</span>
                           </div>
                         </div>
@@ -530,18 +401,18 @@ export default function DetailPage() {
             {/* <!-- Right Column - Booking Widget --> */}
             <div className="lg:w-1/3">
               <div className="bg-white rounded-xl sticky top-6 p-6">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 overflow-auto mb-4">
                   <div>
-                    <span className="text-2xl font-bold">${property.basePrice}</span>
+                    <span className="text-2xl font-bold">{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format((property.basePrice)).toLocaleString()}</span>
                     <span className="text-gray-500">/ night</span>
                   </div>
                   <div className="flex">
-                    <Rating initialValue={4.7} />
-                    <span className="text-gray-500 text-sm ml-1">4.7 (128)</span>
+                    <Rating initialValue={property.rating} />
+                    <span className="text-gray-500 text-sm ml-1">{property.rating} ({property.numbersOfReviews} reviews)</span>
                   </div>
                 </div>
 
-                <BookingForm classes={true} accommodationTypeId={property.id} />
+                <BookingForm classes={true} accommodationTypeId={property.id} isSearchPage />
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 export default function ContactUs() {
   return (
-    <main className="container mx-auto px-4 py-36 max-w-7xl">
-      <section className="bg-white rounded-lg overflow-hidden">
+    <main className="bg-light py-36">
+      <section className="rounded-lg overflow-hidden container mx-auto px-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
           <div>
             <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>

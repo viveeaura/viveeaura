@@ -170,10 +170,8 @@ export default function Apartments() {
 
   if (loading) {
     return (
-      <main className="bg-light pt-36">
-        <div className="flex justify-center h-screen items-center">
-          <Loader />
-        </div>
+      <main>
+        <Loader />
       </main>
     )
   }
