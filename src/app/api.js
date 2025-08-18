@@ -73,6 +73,15 @@ export async function checkAvailability(availabilityData) {
   return await res.json();
 }
 
+export async function fetchAccommodationServices(accommodationTypeId) {
+  const res = await fetch(`${baseUrl}/accommodation_types/services`, {
+    headers: {
+      Authorization: `Basic ${credentials}`
+    }
+  });
+  return await res.json();
+}
+
 export async function createBooking(bookingData) {
   const res = await fetch(`${baseUrl}/bookings`, {
     method: 'POST',
@@ -82,8 +91,10 @@ export async function createBooking(bookingData) {
     },
     body: JSON.stringify(bookingData)
   });
-  localStorage.setItem("bookingId", res.id);
-  return await res.json();
+
+  const saveToStorage = await res.json()
+  if (res.ok) localStorage.setItem("bookingId", saveToStorage.id);
+  return saveToStorage;
 }
 
 export async function fetchBooking(bookingId) {
@@ -95,11 +106,21 @@ export async function fetchBooking(bookingId) {
   return await res.json();
 }
 
-export async function fetchAccommodationServices(accommodationTypeId) {
-  const res = await fetch(`${baseUrl}/accommodation_types/services`, {
-    headers: {
-      Authorization: `Basic ${credentials}`
-    }
+export async function payWithFlutterwave(bookingInfo) {
+
+  const res = await fetch('/api/flutterwave/initialize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookingInfo),
+  });
+  return await res.json();
+}
+
+export async function payWithPaystack(bookingInfo) {
+  const res = await fetch('/api/paystack/initialize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookingInfo),
   });
   return await res.json();
 }
@@ -112,32 +133,6 @@ export async function confirmBookingViaBridge(bookingId, gateway, txRef) {
       Authorization: `Basic ${credentials}`
     },
     body: JSON.stringify({ booking_id: bookingId, gateway, tx_ref: txRef })
-  });
-  return await res.json();
-}
-
-export async function payWithFlutterwave(bookingInfo) {
-  const res = await fetch('/api/flutterwave/initialize', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      paymentIntent: bookingIntent.paymentIntent,
-      email,
-      name: 'John Doe',
-      phone_number: '08010000000',
-    }),
-  });
-  return await res.json();
-}
-
-export async function payWithPaystack(bookingInfo) {
-  const res = await fetch('/api/paystack/initialize', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      paymentIntent: bookingIntent.paymentIntent,
-      email,
-    }),
   });
   return await res.json();
 }

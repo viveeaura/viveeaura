@@ -5,10 +5,13 @@ import { useState, useEffect } from 'react'
 import { fetchReviews } from '@/app/api'
 import Rating from './rating'
 import { RiUserFill } from 'react-icons/ri'
+import { useToast } from '@/context/toastContext'
 
 export default function Testimonial() {
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
+  const { addToast } = useToast();
+
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -16,7 +19,7 @@ export default function Testimonial() {
         const reviewsData = await fetchReviews()
         setReviews(reviewsData.data.slice(0, 3)) // Only show 3 testimonials
       } catch (error) {
-        console.error('Error loading reviews:', error)
+        addToast(`Error loading reviews: ${error}`, 'error');
       } finally {
         setLoading(false)
       }

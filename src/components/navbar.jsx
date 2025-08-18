@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { RiShoppingCartLine, RiMenuLine, RiCloseLine } from 'react-icons/ri'
+import { RiMenuLine, RiCloseLine } from 'react-icons/ri'
 import Image from 'next/image'
 
 export default function Navbar() {

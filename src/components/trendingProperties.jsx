@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { RiHeartLine, RiShareLine, RiCalendarLine, RiArrowRightLine } from 'react-icons/ri'
+import { RiArrowRightLine } from 'react-icons/ri'
 import { fetchRates, fetchAccommodationTypes, fetchReviews } from '@/app/api'
-import Rating from './rating'
 import PropertyCard from './propertyCard '
+import { useToast } from '@/context/toastContext'
 
 export default function TrendingProperties() {
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
+  const { addToast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,7 +62,7 @@ export default function TrendingProperties() {
 
         setProperties(combinedProperties)
       } catch (error) {
-        console.error('Error fetching properties:', error)
+        addToast(`Error fetching properties: ${error}`, 'error');
       } finally {
         setLoading(false)
       }

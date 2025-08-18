@@ -7,6 +7,7 @@ import { fetchRates, fetchAccommodationTypes, fetchReviews } from '@/app/api'
 import PropertyCard from '@/components/propertyCard ' // We'll create this next
 import Loader from '@/components/loader'
 import { RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri'
+import { useToast } from '@/context/toastContext'
 
 export default function Apartments() {
   const [filterSections, setFilterSections] = useState({
@@ -27,6 +28,8 @@ export default function Apartments() {
     amenities: [],
     tags: []
   });
+
+  const { addToast } = useToast();
 
   useEffect(() => {
     const loadProperties = async () => {
@@ -80,7 +83,7 @@ export default function Apartments() {
 
         setProperties(combinedProperties)
       } catch (error) {
-        console.error('Error loading properties:', error)
+        addToast(`Error loading properties`, 'error')
       } finally {
         setLoading(false)
       }
@@ -164,7 +167,7 @@ export default function Apartments() {
 
   // Function to change page
   const paginate = (pageNumber) => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentPage(pageNumber);
   };
 

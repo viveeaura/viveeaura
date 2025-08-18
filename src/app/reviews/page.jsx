@@ -5,6 +5,7 @@ import { RiUserFill } from 'react-icons/ri';
 import { fetchReviews, postReview, fetchAccommodationTypes } from '@/app/api';
 import Rating from '@/components/rating';
 import Loader from '@/components/loader';
+import { useToast } from '@/context/toastContext';
 
 export default function ReviewPage() {
   const [rating, setRating] = useState(0);
@@ -21,6 +22,8 @@ export default function ReviewPage() {
     total: 0,
     breakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
   });
+  const { addToast } = useToast();
+
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -49,7 +52,7 @@ export default function ReviewPage() {
         }
       } catch (error) {
         setLoading(false);
-        console.error('Error loading reviews:', error);
+        addToast(`Error loading reviews, pls try again`, 'error')
       } finally {
         setLoading(false);
       }
@@ -103,8 +106,7 @@ export default function ReviewPage() {
       });
 
     } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Failed to submit review. Please try again.');
+      addToast(`Failed to submit review. Please try again.`, 'error')
     }
   };
 

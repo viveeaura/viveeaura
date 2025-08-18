@@ -13,6 +13,7 @@ import TrendingProperties from '@/components/trendingProperties'
 import { useSearchParams } from 'next/navigation';
 import Custom404 from '@/app/404/page'
 import Loader from '@/components/loader'
+import { useToast } from '@/context/toastContext'
 
 export default function DetailPage() {
 
@@ -31,6 +32,8 @@ export default function DetailPage() {
 
   const searchParams = useSearchParams();
   const id = searchParams.get('id'); // Gets `id=62`
+
+  const { addToast } = useToast();
 
   if (!id) return <Custom404 />;
 
@@ -63,7 +66,7 @@ export default function DetailPage() {
           totalCapacity: accommodation.adults + accommodation.children
         })
       } catch (error) {
-        console.error('Error loading property:', error)
+        addToast(`Error loading properties`, 'error')
       } finally {
         setLoading(false)
       }
@@ -239,7 +242,7 @@ export default function DetailPage() {
                             Bathroom
                           </h3>
                         </div>
-                        {property.amenities.length > 0 ? 
+                        {property.amenities.length > 0 ?
                           <div className="border-t border-b border-gray-200">
                             <div className="flex flex-wrap gap-4">
                               {property.amenities?.map((amenity, index) => (
@@ -250,9 +253,9 @@ export default function DetailPage() {
                             </div>
                           </div>
                           :
-                          <h4>No Amenities</h4> 
-                      }
-                        
+                          <h4>No Amenities</h4>
+                        }
+
                       </div>
                     </section>
 

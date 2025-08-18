@@ -6,11 +6,13 @@ import { useSearchParams } from 'next/navigation'
 import PropertyCard from '@/components/propertyCard '
 import Loader from '@/components/Loader'
 import { fetchRates, fetchAccommodationTypes, fetchReviews } from '@/app/api'
+import { useToast } from '@/context/toastContext'
 
 export default function SearchResultsPage() {
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [filteredProperties, setFilteredProperties] = useState([])
+  const { addToast } = useToast();
 
   // Get search parameters
   const checkInDate = searchParams.get('check_in_date')
@@ -90,7 +92,7 @@ export default function SearchResultsPage() {
 
         setFilteredProperties(filtered)
       } catch (error) {
-        console.error('Error loading properties:', error)
+        addToast(`Error loading properties: ${error}`, 'error')
       } finally {
         setLoading(false)
       }

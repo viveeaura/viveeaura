@@ -43,13 +43,14 @@ export default function BookingForm({ classes, accommodationTypeId, isSearchPage
       }
 
       const result = await checkAvailability(availabilityData)
+
       localStorage.setItem('availability', JSON.stringify(result.availability) ?? [])
       setAvailability(result)
 
       // Only redirect if not on the search page already
       if (isSearchPage && result.availability.length === 1) {
         // When on search page and only one property is available, go to checkout
-        router.push(`/checkout?rate_id=${rate_id}&apartment_id=${result.availability[0].accommodation_type
+        router.push(`/checkout?rate_id=${rate_id}&accommodation_id=${result?.availability[0]?.accommodations[0].id}&apartment_id=${result?.availability[0]?.accommodation_type
           }&check_in=${formatDate(checkInDate)}&check_out=${formatDate(checkOutDate)}&adults=${adults}&children=${children}`)
       } else if (!isSearchPage) {
         // When not on search page, show search results
