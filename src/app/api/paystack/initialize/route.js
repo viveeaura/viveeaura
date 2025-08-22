@@ -1,19 +1,17 @@
 // pages/api/paystack/initialize.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'cross-fetch';
-import { verifySignedPayload } from '../../../lib/payments';
+import { NextResponse } from 'next/server';
 import { v4 as uuid } from 'uuid';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req) {
   try {
-    if (req.method !== 'POST') return res.status(405).end();
-    const { paymentIntent, email } = req.body;
-    const { bookingId, amount, currency } = verifySignedPayload(paymentIntent);
 
-    const reference = `bk_${bookingId}_${uuid()}`;
+    const { id, total_price, currency, customer: { email } } = await req.json();
+
+    const reference = `bk_${id}_${uuid()}`;
 
     // Paystack needs amount in KOBO
-    const amountKobo = amount * 100;
+    const amountKobo = total_price * 100;
 
     const initRes = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
@@ -26,21 +24,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         amount: amountKobo,
         currency: currency || 'NGN',
         reference,
-        metadata: { bookingId },
-        callback_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout?bookingId=${bookingId}&ref=${reference}&gw=paystack`,
+        metadata: { id },
+        callback_url: `${process.env.NEXT_PUBLIC_BASE_URL}?bookingId=${id}&ref=${reference}&gw=paystack`,
       }),
     });
 
     const data = await initRes.json();
+
     if (!data.status) {
-      return res.status(400).json({ error: data?.message || 'Paystack init failed' });
+      return NextResponse.json({ error: data?.message || 'Paystack init failed' }, { statu: 400 });
     }
 
-    res.status(200).json({
+    return NextResponse.json({
       authorization_url: data.data.authorization_url,
       reference,
-    });
-  } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

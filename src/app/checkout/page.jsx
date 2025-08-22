@@ -199,11 +199,11 @@ export default function CheckOut() {
         }
       } else if (paymentMethod === 'paystack') {
         // Process Paystack payment
-        const data = await payWithPaystack()
+        const data = await payWithPaystack(bookingIntent)
         if (data?.authorization_url) {
           location.href = data.authorization_url;
         } else {
-          alert(data?.error || 'Could not start Paystack');
+          addToast('Could not start Paystack', 'error')
         }
       }
     } catch (err) {

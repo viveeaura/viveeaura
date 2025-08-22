@@ -10,10 +10,6 @@ export default function AboutUs() {
           <div className="max-w-2xl text-white relative z-10">
             <h2 className="text-4xl font-bold mb-4">Our Story</h2>
             <p className="text-lg mb-8">Discover the people and passion behind UrbanStay, dedicated to finding your perfect urban home since 2015.</p>
-            {/* <div className="flex space-x-4">
-              <a href="#our-mission" className="bg-accent hover:bg-accent/90 text-white px-6 py-3 font-medium !rounded-button whitespace-nowrap">Our Mission</a>
-              <a href="#meet-the-team" className="bg-white hover:bg-gray-100 text-primary px-6 py-3 font-medium !rounded-button whitespace-nowrap">Meet the Team</a>
-            </div> */}
           </div>
         </div>
       </section>
@@ -237,7 +233,23 @@ export default function AboutUs() {
         </section>
 
         {/* <!--Testimonials --> */}
-        <Testimonial />
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-4 max-w-7xl">
+            <div className="max-w-4xl mx-auto text-center mb-12">
+              <span className="inline-block bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-medium mb-4">
+                Happy Residents
+              </span>
+              <h2 className="md:text-4xl text-2xl font-bold mb-4">
+                What Our Residents Say
+              </h2>
+              <p className="text-gray-600">
+                Don't just take our word for it - hear from our satisfied residents about their experience.
+              </p>
+            </div>
+
+            <Testimonial />
+          </div>
+        </section>
       </section>
     </section>
   );

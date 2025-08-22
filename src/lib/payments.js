@@ -1,7 +1,7 @@
 // lib/payments.ts
 import crypto from 'crypto';
 
-const SECRET = process.env.INTERNAL_SIGNING_SECRET;
+const SECRET = process.env.NEXT_PUBLIC_INTERNAL_SIGNING_SECRET;
 
 // Sign a payload (e.g., bookingId + amount) to prevent client tampering
 export function signPayload(data) {

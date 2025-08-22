@@ -1,5 +1,7 @@
 const credentials = btoa(`${process.env.NEXT_PUBLIC_WP_USERNAME}:${process.env.NEXT_PUBLIC_WP_PASSWORD}`);
+const singleUserCredentials = btoa(`${process.env.NEXT_PUBLIC_WP_USER}:${process.env.NEXT_PUBLIC_WP_PASS}`);
 const baseUrl = process.env.NEXT_PUBLIC_WP_BASE_URL;
+const SECRET = process.env.NEXT_PUBLIC_INTERNAL_SIGNING_SECRET;
 
 export async function fetchRates() {
   const res = await fetch(`${baseUrl}/rates`, {
@@ -125,14 +127,14 @@ export async function payWithPaystack(bookingInfo) {
   return await res.json();
 }
 
-export async function confirmBookingViaBridge(bookingId, gateway, txRef) {
+export async function confirmBookingViaBridge(bookingId, gateway, tx_ref, amount) {
   const res = await fetch(`https://viveeaura.org/wp-json/mphb-bridge/v1/confirm-booking`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Basic ${credentials}`
+      'X-API-KEY': SECRET,
     },
-    body: JSON.stringify({ booking_id: bookingId, gateway, tx_ref: txRef })
+    body: JSON.stringify({ booking_id: bookingId, gateway, tx_ref, amount })
   });
   return await res.json();
 }

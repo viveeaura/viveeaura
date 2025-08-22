@@ -1,48 +1,63 @@
 // pages/api/paystack/webhook.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { confirmBookingViaBridge, fetchBooking } from '@/app/api';
+import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import fetch from 'cross-fetch';
-import { mphbConfirmBookingViaBridge, mphbGetBooking } from '../../../lib/wp';
 
 export const config = { api: { bodyParser: false } }; // raw body for signature
 
-function readBody(req: NextApiRequest): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    req.on('data', chunk => (data += chunk));
-    req.on('end', () => resolve(data));
-    req.on('error', reject);
-  });
-}
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req) {
   try {
-    const secret = process.env.PAYSTACK_SECRET!;
-    const raw = await readBody(req);
-    const signature = req.headers['x-paystack-signature'] as string;
-    const hash = crypto.createHmac('sha512', secret).update(raw).digest('hex');
-    if (hash !== signature) return res.status(401).end('Invalid signature');
 
-    const evt = JSON.parse(raw);
+    // 1. Verify signature
+    const rawBody = await req.text();
+    const signature = req.headers.get('x-paystack-signature');
+    const generatedSignature = crypto
+      .createHmac('sha512', process.env.PAYSTACK_SECRET)
+      .update(rawBody)
+      .digest('hex');
 
-    if (evt.event === 'charge.success' && evt.data?.status === 'success') {
-      const bookingId = Number(evt.data?.metadata?.bookingId);
-      const amountPaidKobo = Number(evt.data?.amount);
-      if (!bookingId) return res.status(400).end('No bookingId in metadata');
-
-      // Optional: sanity check against current booking total in WP
-      const booking = await mphbGetBooking(bookingId);
-      const expected = Math.round(Number(booking?.total_price ?? booking?.total ?? 0)) * 100; // kobo
-      if (expected && amountPaidKobo < expected) {
-        return res.status(400).end('Underpayment');
-      }
-
-      await mphbConfirmBookingViaBridge(bookingId, 'paystack', evt.data.reference);
+    if (signature !== generatedSignature) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid signature' },
+        { status: 401 }
+      );
     }
 
-    res.status(200).end('OK');
-  } catch (e: any) {
-    res.status(500).end(e.message);
+    // 2. Parse body
+    const evt = JSON.parse(rawBody);
+    
+    // 3. Process successful payment
+    if (evt.event === 'charge.success' && evt.data?.status === 'success') {
+      const bookingId = Number(evt.data?.metadata?.id);
+      const amountPaidKobo = Number(evt.data?.amount);
+      
+      if (!bookingId || isNaN(bookingId)) {
+        return NextResponse.json(
+          { error: 'Missing or invalid bookingId in metadata' },
+          { status: 400 }
+        );
+      }
+      
+      // Optional: sanity check against current booking total in WP
+      const booking = await fetchBooking(bookingId);
+      const expected = Math.round(Number(booking?.total_price ?? booking?.total ?? 0)) * 100; // kobo
+
+      if (expected && amountPaidKobo < expected) {
+        return NextResponse.json(
+          { error: `Underpayment: Paid ${paidAmount}, expected ${expectedAmount}` },
+          { status: 400 }
+        );
+      }
+      //paypal to represent paystack since motopress lite does not recognize it 
+      await confirmBookingViaBridge(bookingId, 'paypal', evt.data.reference, booking?.total_price);
+    }
+
+    return NextResponse.json({ status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
 

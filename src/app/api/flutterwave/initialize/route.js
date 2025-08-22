@@ -28,7 +28,7 @@ export async function POST(req) {
     const data = await initRes.json();
 
     if (data.status !== 'success') {
-      return NextResponse.json({ error: data?.message || 'Flutterwave init failed' });
+      return NextResponse.json({ error: data?.message || 'Flutterwave init failed' }, { statu: 400 });
     }
 
     return NextResponse.json({

@@ -3,6 +3,7 @@ import FeaturedProperties from "@/components/featuredProperties";
 import MovingTips from "@/components/movingTips";
 import NeighborhoodGuides from "@/components/neighborhood";
 import TrendingProperties from "@/components/trendingProperties";
+import { RiCustomerService2Line, RiKeyLine, RiShieldCheckLine } from "react-icons/ri";
 
 export default function Home() {
   return (
@@ -64,7 +65,7 @@ export default function Home() {
                   Specials</button>
                 <button
                   className="bg-white border border-gray-300 hover:border-accent text-gray-800 hover:text-accent px-6 py-3 font-medium !rounded-button whitespace-nowrap">Contact
-                  Agent</button>
+                  Manager</button>
               </div>
             </div>
             <div className="md:w-1/2 h-80 md:h-auto">
@@ -76,7 +77,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="bg-light p-6 rounded-lg shadow-sm flex items-center">
               <div className="w-12 h-12 flex items-center justify-center bg-accent/10 rounded-full mr-4">
-                <i className="ri-key-line ri-lg text-accent"></i>
+                <RiKeyLine className="text-accent"/>
               </div>
               <div>
                 <h3 className="font-bold mb-1">Easy Move-in</h3>
@@ -85,7 +86,7 @@ export default function Home() {
             </div>
             <div className="bg-light p-6 rounded-lg shadow-sm flex items-center">
               <div className="w-12 h-12 flex items-center justify-center bg-accent/10 rounded-full mr-4">
-                <i className="ri-shield-check-line ri-lg text-accent"></i>
+                <RiShieldCheckLine className="text-accent" />
               </div>
               <div>
                 <h3 className="font-bold mb-1">Verified Listings</h3>
@@ -94,7 +95,7 @@ export default function Home() {
             </div>
             <div className="bg-light p-6 rounded-lg shadow-sm flex items-center">
               <div className="w-12 h-12 flex items-center justify-center bg-accent/10 rounded-full mr-4">
-                <i className="ri-customer-service-2-line ri-lg text-accent"></i>
+                <RiCustomerService2Line className="text-accent" />
               </div>
               <div>
                 <h3 className="font-bold mb-1">24/7 Support</h3>
