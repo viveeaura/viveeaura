@@ -2,12 +2,20 @@
 'use client'
 
 import Link from 'next/link'
-import { RiCalendarLine, RiHeartLine, RiShareLine, RiCloseLine } from 'react-icons/ri'
-import { useState } from 'react'
+import { RiCalendarLine, RiHeartLine, RiShareLine, RiCloseLine, RiFacebookFill, RiTwitterXFill, RiLinkedinFill, RiWhatsappFill, RiMailLine, RiLinksLine } from 'react-icons/ri'
+import { useState, useEffect } from 'react'
 import Rating from './rating'
+// In your details page component
+import Head from 'next/head'
 
 export default function PropertyCard({ property, classes }) {
   const [showShareOptions, setShowShareOptions] = useState(false)
+  const [currentUrl, setCurrentUrl] = useState('')
+
+  useEffect(() => {
+    // Set the current URL for sharing
+    setCurrentUrl(`${window.location.origin}/apartments/details?id=${property.id}`)
+  }, [property.id])
 
   const handleShareClick = () => {
     // Check if Web Share API is supported (mostly mobile devices)
@@ -15,7 +23,7 @@ export default function PropertyCard({ property, classes }) {
       navigator.share({
         title: property.title,
         text: `Check out this property: ${property.title}`,
-        url: `${window.location.origin}/apartments/details?id=${property.id}`,
+        url: currentUrl,
       })
         .catch((error) => {
           console.log('Error sharing:', error)
@@ -27,38 +35,36 @@ export default function PropertyCard({ property, classes }) {
   }
 
   const shareToSocialMedia = (platform) => {
-    const shareUrl = `${window.location.origin}/apartments/details?id=${property.id}`
     const shareText = `Check out this property: ${property.title}`
 
     let url = ''
 
     switch (platform) {
       case 'facebook':
-        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`
+        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`
         break
       case 'twitter':
-        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
+        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`
         break
       case 'linkedin':
-        url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
+        url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`
         break
       case 'whatsapp':
-        url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`
+        url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + currentUrl)}`
         break
       case 'email':
-        url = `mailto:?subject=${encodeURIComponent(property.title)}&body=${encodeURIComponent(shareText + '\n' + shareUrl)}`
+        url = `mailto:?subject=${encodeURIComponent(property.title)}&body=${encodeURIComponent(shareText + '\n' + currentUrl)}`
         break
       default:
         return
     }
 
-    window.open(url, '_blank')
+    window.open(url, '_blank', 'width=600,height=400')
     setShowShareOptions(false)
   }
 
   const copyToClipboard = () => {
-    const url = `${window.location.origin}/apartments/details?id=${property.id}`
-    navigator.clipboard.writeText(url)
+    navigator.clipboard.writeText(currentUrl)
       .then(() => {
         alert('Link copied to clipboard!')
         setShowShareOptions(false)
@@ -70,6 +76,22 @@ export default function PropertyCard({ property, classes }) {
 
   return (
     <div key={property.id} className={`${classes} bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-all hover:shadow-md group`}>
+
+      <Head>
+        <title>{property.title}</title>
+        <meta property="og:title" content={property.title} />
+        <meta property="og:description" content={`Check out this property: ${property.title} located in ${property.location}`} />
+        <meta property="og:image" content={property.image} />
+        <meta property="og:url" content={`https://3853975d65dd.ngrok-free.app/apartments/details?id=${property.id}`} />
+        <meta property="og:type" content="website" />
+
+        {/* Twitter Card tags for better Twitter sharing */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={property.title} />
+        <meta name="twitter:description" content={`Check out this property: ${property.title}`} />
+        <meta name="twitter:image" content={property.image} />
+      </Head>
+
       <div className="relative h-64 overflow-hidden">
         <img
           src={property.image}
@@ -139,25 +161,25 @@ export default function PropertyCard({ property, classes }) {
 
       {/* Share Modal */}
       {showShareOptions && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-80 max-w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">Share this property</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-xl">Share this property</h3>
               <button
                 onClick={() => setShowShareOptions(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
               >
                 <RiCloseLine className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-4 gap-4 mb-6">
               <button
                 onClick={() => shareToSocialMedia('facebook')}
                 className="flex flex-col items-center p-3 rounded-lg hover:bg-blue-50 transition-colors"
               >
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white mb-1">
-                  <span className="font-bold">f</span>
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white mb-2">
+                  <RiFacebookFill className="w-6 h-6" />
                 </div>
                 <span className="text-xs">Facebook</span>
               </button>
@@ -166,8 +188,8 @@ export default function PropertyCard({ property, classes }) {
                 onClick={() => shareToSocialMedia('twitter')}
                 className="flex flex-col items-center p-3 rounded-lg hover:bg-blue-50 transition-colors"
               >
-                <div className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center text-white mb-1">
-                  <span className="font-bold">t</span>
+                <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white mb-2">
+                  <RiTwitterXFill className="w-6 h-6" />
                 </div>
                 <span className="text-xs">Twitter</span>
               </button>
@@ -176,8 +198,8 @@ export default function PropertyCard({ property, classes }) {
                 onClick={() => shareToSocialMedia('linkedin')}
                 className="flex flex-col items-center p-3 rounded-lg hover:bg-blue-50 transition-colors"
               >
-                <div className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center text-white mb-1">
-                  <span className="font-bold">in</span>
+                <div className="w-12 h-12 bg-blue-700 rounded-full flex items-center justify-center text-white mb-2">
+                  <RiLinkedinFill className="w-6 h-6" />
                 </div>
                 <span className="text-xs">LinkedIn</span>
               </button>
@@ -186,8 +208,8 @@ export default function PropertyCard({ property, classes }) {
                 onClick={() => shareToSocialMedia('whatsapp')}
                 className="flex flex-col items-center p-3 rounded-lg hover:bg-green-50 transition-colors"
               >
-                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white mb-1">
-                  <span className="font-bold">w</span>
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white mb-2">
+                  <RiWhatsappFill className="w-6 h-6" />
                 </div>
                 <span className="text-xs">WhatsApp</span>
               </button>
@@ -196,8 +218,8 @@ export default function PropertyCard({ property, classes }) {
                 onClick={() => shareToSocialMedia('email')}
                 className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white mb-1">
-                  <span className="font-bold">@</span>
+                <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center text-white mb-2">
+                  <RiMailLine className="w-6 h-6" />
                 </div>
                 <span className="text-xs">Email</span>
               </button>
@@ -206,11 +228,15 @@ export default function PropertyCard({ property, classes }) {
                 onClick={copyToClipboard}
                 className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white mb-1">
-                  <span className="font-bold">🔗</span>
+                <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white mb-2">
+                  <RiLinksLine className="w-6 h-6" />
                 </div>
                 <span className="text-xs">Copy Link</span>
               </button>
+            </div>
+
+            <div className="text-center text-sm text-gray-500">
+              <p>When you share, the link will include the property image and details.</p>
             </div>
           </div>
         </div>
