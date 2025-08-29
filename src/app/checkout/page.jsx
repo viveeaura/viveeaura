@@ -1,7 +1,7 @@
 // app/checkout/page.js
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { RiPencilLine, RiArrowRightLine, RiBankCardLine, RiShieldCheckLine, RiFlutterFill } from 'react-icons/ri'
 import { createBooking, fetchRateById, fetchAccommodationTypeById, fetchBooking, payWithPaystack, payWithFlutterwave } from '@/app/api'
@@ -9,7 +9,7 @@ import Loader from '@/components/loader'
 import AdditionalServices from '@/components/AdditionalServices'
 import { useToast } from '@/context/toastContext'
 
-function CheckOut() {
+export default function CheckOut() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [bookingData, setBookingData] = useState();
@@ -820,10 +820,3 @@ function CheckOut() {
   )
 }
 
-export default function CheckoutPage() {
-  return (
-    <Suspense>
-      <CheckOut />
-    </Suspense>
-  )
-}

@@ -1,7 +1,7 @@
 // components/BookingForm.js
 'use client'
 
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RiCalendarLine, RiArrowDownSLine } from 'react-icons/ri'
 import DatePicker from 'react-datepicker'
@@ -10,7 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { checkAvailability } from '@/app/api'
 import { useToast } from '@/context/toastContext'
 
-function Booking({ classes, accommodationTypeId, isSearchPage = false }) {
+export default function BookingForm({ classes, accommodationTypeId, isSearchPage = false }) {
   const router = useRouter()
   const [checkInDate, setCheckInDate] = useState(null)
   const [checkOutDate, setCheckOutDate] = useState(null)
@@ -201,13 +201,5 @@ function Booking({ classes, accommodationTypeId, isSearchPage = false }) {
         </div>
       </div>
     </section>
-  )
-}
-
-export default function BookingForm() {
-  return (
-    <Suspense>
-      <Booking />
-    </Suspense>
   )
 }

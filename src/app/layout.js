@@ -3,6 +3,7 @@ import "./globals.css";
 import Footer from "@/components/footer";
 import BackToTopButton from "@/components/backToTopButton";
 import { ToastProvider } from "@/context/toastContext";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Vivee Aura | Luxury Service Apartments in Lagos – Book Your Stay Today",
@@ -56,7 +57,9 @@ export default function RootLayout({ children }) {
       <body>
         <Navbar />
         <ToastProvider>
-          {children}
+          <Suspense>
+            {children}
+          </Suspense>
         </ToastProvider>
         <BackToTopButton />
         <Footer />
