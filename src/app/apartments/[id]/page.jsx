@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { fetchRateById, fetchAccommodationTypeById, fetchReviews } from '@/app/api'
 import ImageGallery from '@/components/gallery'
@@ -15,7 +15,7 @@ import Custom404 from '@/app/404/page'
 import Loader from '@/components/loader'
 import { useToast } from '@/context/toastContext'
 
-export default function DetailPage() {
+function DetailHomePage() {
 
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -428,3 +428,12 @@ export default function DetailPage() {
     </section>
   )
 }
+
+export default function DetailPage(){
+  return (
+    <Suspense>
+      <DetailPage />
+    </Suspense>
+  )
+}
+

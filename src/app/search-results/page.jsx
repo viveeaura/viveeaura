@@ -1,14 +1,14 @@
 // app/search-results/page.js
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PropertyCard from '@/components/propertyCard '
 import Loader from '@/components/loader'
 import { fetchRates, fetchAccommodationTypes, fetchReviews } from '@/app/api'
 import { useToast } from '@/context/toastContext'
 
-export default function SearchResultsPage() {
+function SearchResults() {
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [filteredProperties, setFilteredProperties] = useState([])
@@ -142,5 +142,13 @@ export default function SearchResultsPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function SearchResultsPage() {
+  return (
+    <Suspense>
+      <SearchResults />
+    </Suspense>
   )
 }

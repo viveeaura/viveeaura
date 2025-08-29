@@ -791,11 +791,11 @@ function CheckOut() {
                 <p className="text-gray-600 text-sm">
                   {new Date(formData.check_in_date).toLocaleDateString()} - {new Date(formData.check_out_date).toLocaleDateString()}
                 </p>
-              </div>
-
               {bookingIntent?.status === "pending-payment" &&
                 <small className='text-yellow-400'>your {bookingIntent?.status}, will expire in an hour</small>
               }
+              </div>
+
 
               <div className="flex justify-between font-bold text-lg border-b border-gray-200 pb-4 mb-4">
                 <span>Total</span>
