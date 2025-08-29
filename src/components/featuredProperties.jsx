@@ -120,7 +120,7 @@ export default function FeaturedProperties() {
               <img
                 src={property.image}
                 alt={property.title}
-                className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/300x400?text=Image+Not+Found'
                 }}

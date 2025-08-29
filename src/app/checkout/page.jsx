@@ -1,7 +1,7 @@
 // app/checkout/page.js
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { RiPencilLine, RiArrowRightLine, RiBankCardLine, RiShieldCheckLine, RiFlutterFill } from 'react-icons/ri'
 import { createBooking, fetchRateById, fetchAccommodationTypeById, fetchBooking, payWithPaystack, payWithFlutterwave } from '@/app/api'
@@ -9,7 +9,7 @@ import Loader from '@/components/loader'
 import AdditionalServices from '@/components/AdditionalServices'
 import { useToast } from '@/context/toastContext'
 
-export default function CheckOut() {
+function CheckOut() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [bookingData, setBookingData] = useState();
@@ -269,6 +269,7 @@ export default function CheckOut() {
 
           {/* Left Column - Booking Form */}
           <div className="lg:w-2/3">
+            <p className='text-red-400'>This website is in a testing phase, please no real payment</p>
             <h2 className="text-2xl font-bold mb-6">Complete Your Booking</h2>
 
             {activeStep === 1 && (
@@ -816,5 +817,13 @@ export default function CheckOut() {
         </div>
       </main>
     </section>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense>
+      <CheckOut />
+    </Suspense>
   )
 }
