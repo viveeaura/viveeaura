@@ -12,7 +12,7 @@ export const metadata = {
   openGraph: {
     title: "Vivee Aura | Luxury Service Apartments in Lagos",
     description: "Book your stay at Vivee Aura, Lagos' top choice for short-let luxury service apartments with premium amenities.",
-    url: "https://www.viveeaura.com",
+    url: "https://www.viveeaura.com/preview.jpg",
     siteName: "Vivee Aura Service Apartment",
     images: [
       {
