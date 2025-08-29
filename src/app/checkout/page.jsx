@@ -10,11 +10,11 @@ import AdditionalServices from '@/components/AdditionalServices'
 import { useToast } from '@/context/toastContext'
 
 export default function CheckOut() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [bookingData, setBookingData] = useState()
-  const [activeStep, setActiveStep] = useState(1)
-  const [paymentMethod, setPaymentMethod] = useState('')
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [bookingData, setBookingData] = useState();
+  const [activeStep, setActiveStep] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [bookingIntent, setBookingIntent] = useState(null);
 
   const [servicesData, setServicesData] = useState({
