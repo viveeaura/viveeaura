@@ -10,7 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { checkAvailability } from '@/app/api'
 import { useToast } from '@/context/toastContext'
 
-export default function Booking({ classes, accommodationTypeId, isSearchPage = false }) {
+function Booking({ classes, accommodationTypeId, isSearchPage = false }) {
   const router = useRouter()
   const [checkInDate, setCheckInDate] = useState(null)
   const [checkOutDate, setCheckOutDate] = useState(null)

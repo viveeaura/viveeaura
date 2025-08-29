@@ -432,7 +432,7 @@ function DetailHomePage() {
 export default function DetailPage(){
   return (
     <Suspense>
-      <DetailPage />
+      <DetailHomePage />
     </Suspense>
   )
 }
