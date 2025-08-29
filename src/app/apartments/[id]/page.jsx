@@ -140,7 +140,7 @@ export default function DetailPage() {
                       className={`py-3 relative text-sm font-medium transition-colors ${activeTab === tab.id ? 'text-accent border-b border-accent active-tab' : 'text-gray-600 hover:text-accent '}`}
                       onClick={() => setActiveTab(tab.id)}
                     >
-                      <span className="relative z-10">{tab.label}</span>
+                      <span className="relative z-10 text-nowrap">{tab.label}</span>
                       {activeTab === tab.id && (
                         <motion.div
                           className="absolute bottom-0 h-0.5"
