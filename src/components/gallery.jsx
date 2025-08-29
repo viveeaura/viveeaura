@@ -3,14 +3,24 @@
 import { useState } from 'react';
 import { RiFullscreenLine, RiCloseLine, RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
 
-export default function ImageGallery({images}) {
-
+export default function ImageGallery({ images }) {
   const [currentImage, setCurrentImage] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const maxThumbnails = 4; // Maximum thumbnails to show before using +X
 
   const toggleFullscreen = () => setIsFullscreen(!isFullscreen);
   const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
   const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+
+  // Function to handle thumbnail click when there are more than maxThumbnails
+  const handleThumbnailClick = (index) => {
+    if (index >= maxThumbnails - 1 && images.length > maxThumbnails) {
+      // If clicking on the "+X" thumbnail, go to the first hidden image
+      setCurrentImage(maxThumbnails - 1);
+    } else {
+      setCurrentImage(index);
+    }
+  };
 
   if (isFullscreen) {
     return (
@@ -61,9 +71,9 @@ export default function ImageGallery({images}) {
   }
 
   return (
-    <section className="container mx-auto max-w-7xl px-4 py-6">
+    <section className="mx-auto max-w-7xl px-4 py-6 grid md:grid-cols-4 gap-5">
       {/* Main Image */}
-      <div className="relative rounded-xl overflow-hidden h-96 mb-4">
+      <div className="relative rounded-xl overflow-hidden h-[465px] col-span-3">
         <img
           src={images[currentImage].src}
           alt={images[currentImage].title}
@@ -78,21 +88,37 @@ export default function ImageGallery({images}) {
       </div>
 
       {/* Thumbnails */}
-      <div className="grid grid-cols-5 gap-3">
-        {images.map((image, index) => (
-          <div
-            key={image.id}
-            className={`rounded-lg overflow-hidden h-24 border-2 cursor-pointer transition-all ${currentImage === index ? 'border-accent' : 'border-transparent'
-              }`}
-            onClick={() => setCurrentImage(index)}
-          >
-            <img
-              src={image.src}
-              alt={image.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ))}
+      <div className="grid md:grid-cols-1 grid-cols-4 gap-3">
+        {images.slice(0, Math.min(images.length, maxThumbnails)).map((image, index) => {
+          // If we're at the last thumbnail and there are more images than maxThumbnails
+          if (index === maxThumbnails - 1 && images.length > maxThumbnails) {
+            const remainingCount = images.length - maxThumbnails + 1;
+            return (
+              <div
+                key="more-thumbnails"
+                className="rounded-lg overflow-hidden h-24 border-2 cursor-pointer transition-all border-transparent bg-gray-200 flex items-center justify-center"
+                onClick={() => handleThumbnailClick(index)}
+              >
+                <span className="text-xl font-semibold text-gray-700">+{remainingCount}</span>
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={image.id}
+              className={`rounded-lg overflow-hidden h-24 border-2 cursor-pointer transition-all ${currentImage === index ? 'border-accent' : 'border-transparent'
+                }`}
+              onClick={() => setCurrentImage(index)}
+            >
+              <img
+                src={image.src}
+                alt={image.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          );
+        })}
       </div>
     </section>
   );

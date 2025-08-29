@@ -64,7 +64,7 @@ export default function ReviewPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (rating === 0 || !review.trim() || !title.trim()) return;
-    console.log(post_id)
+
     try {
       const newReview = {
         post_id,

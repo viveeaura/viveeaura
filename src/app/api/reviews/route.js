@@ -6,8 +6,8 @@ export async function GET(req) {
     const id = req.nextUrl.searchParams.get("id")
 
     const url = id
-      ? `https://viveeaura.org/wp-json/mphb/v1/reviews/${id}`
-      : `https://viveeaura.org/wp-json/mphb/v1/reviews`;
+      ? `${process.env.NEXT_PUBLIC_WP_BASE_URL}/reviews/${id}`
+      : `${process.env.NEXT_PUBLIC_WP_BASE_URL}/reviews`;
 
     const response = await fetch(url);
     const data = await response.json();
@@ -30,7 +30,7 @@ export async function POST(req) {
       );
     }
 
-    const response = await fetch('https://viveeaura.org/wp-json/mphb/v1/reviews', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_WP_BASE_URL}/reviews`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',

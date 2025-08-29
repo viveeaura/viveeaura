@@ -8,6 +8,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useSearchParams } from 'next/navigation';
 import { checkAvailability } from '@/app/api'
+import { useToast } from '@/context/toastContext'
 
 export default function BookingForm({ classes, accommodationTypeId, isSearchPage = false }) {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function BookingForm({ classes, accommodationTypeId, isSearchPage
   const [loading, setLoading] = useState(false)
   const [availability, setAvailability] = useState(null)
   const [error, setError] = useState(null)
+  const { addToast } = useToast();
 
   const searchParams = useSearchParams();
   const rate_id = searchParams.get('id') ?? 0; // Gets `id=62`
@@ -58,8 +60,7 @@ export default function BookingForm({ classes, accommodationTypeId, isSearchPage
           }`)
       }
     } catch (err) {
-      setError('Failed to check availability. Please try again.')
-      console.error('Availability check error:', err)
+      addToast(`Failed to check availability. Please try again.`, 'error')
     } finally {
       setLoading(false)
     }

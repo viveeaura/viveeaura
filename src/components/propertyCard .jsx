@@ -7,10 +7,13 @@ import { useState, useEffect } from 'react'
 import Rating from './rating'
 // In your details page component
 import Head from 'next/head'
+import { useToast } from '@/context/toastContext'
 
 export default function PropertyCard({ property, classes }) {
   const [showShareOptions, setShowShareOptions] = useState(false)
   const [currentUrl, setCurrentUrl] = useState('')
+
+  const { addToast } = useToast();
 
   useEffect(() => {
     // Set the current URL for sharing
@@ -25,8 +28,8 @@ export default function PropertyCard({ property, classes }) {
         text: `Check out this property: ${property.title}`,
         url: currentUrl,
       })
-        .catch((error) => {
-          console.log('Error sharing:', error)
+        .catch(() => {
+          addToast(`Failed to share. Please try again.`, 'error')
         })
     } else {
       // Show custom share dialog for desktop users
@@ -69,8 +72,8 @@ export default function PropertyCard({ property, classes }) {
         alert('Link copied to clipboard!')
         setShowShareOptions(false)
       })
-      .catch(err => {
-        console.error('Failed to copy: ', err)
+      .catch(() => {
+        addToast(`Failed to copy. Please try again.`, 'error')
       })
   }
 
@@ -82,7 +85,7 @@ export default function PropertyCard({ property, classes }) {
         <meta property="og:title" content={property.title} />
         <meta property="og:description" content={`Check out this property: ${property.title} located in ${property.location}`} />
         <meta property="og:image" content={property.image} />
-        <meta property="og:url" content={`https://3853975d65dd.ngrok-free.app/apartments/details?id=${property.id}`} />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_WP_BASE_URL_l}/apartments/details?id=${property.id}`} />
         <meta property="og:type" content="website" />
 
         {/* Twitter Card tags for better Twitter sharing */}
@@ -96,7 +99,7 @@ export default function PropertyCard({ property, classes }) {
         <img
           src={property.image}
           alt={property.title}
-          className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
         {/* Action buttons */}
@@ -116,7 +119,7 @@ export default function PropertyCard({ property, classes }) {
         {property.tag && (
           <div className="absolute top-3 left-3">
             <span className={`${property.tag.color} text-white text-xs px-2 py-1 rounded`}>
-              {property.tag.text}
+              {property.tag.text ?? 'Popular'}
             </span>
           </div>
         )}

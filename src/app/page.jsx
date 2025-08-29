@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <section className="bg-light">
       {/* <!-- Hero Section --> */}
-      <section className="relative w-full h-[650px] bg-cover bg-center bg-[url('https://public.readdy.ai/ai/img_res/3dc64b554b80f99d5b35766cb7e2a520.jpg')] bg-cover bg-center">
+      <section className="relative w-full h-[650px] bg-cover bg-center bg-[url('/preview.jpg')]">
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent"></div>
         <div className="container mx-auto px-4 max-w-7xl h-full flex items-center">
           <div className="max-w-xl text-white relative z-10 md:text-left text-center">
@@ -31,7 +31,7 @@ export default function Home() {
 
       <NeighborhoodGuides />
 
-      <section className="py-16 bg-white">
+      {/* <section className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between text-white bg-primary rounded-lg shadow-md overflow-hidden">
             <div className="p-8 md:p-12 md:w-1/2 ">
@@ -104,9 +104,9 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <MovingTips />
+      {/* <MovingTips /> */}
     </section>
   );
 }

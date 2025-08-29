@@ -56,7 +56,7 @@ export default function TrendingProperties() {
             rating: avgRating,
             reviews: propertyReviews.length,
             description: rate.description || '',
-            tag: rate.status === 'active' ? { text: accommodation.tags[0].name, color: accommodation.tags[0].name === 'Bestseller' ? 'bg-green-500' : accommodation.tags[0].name === '-10%' ? 'bg-secondary' : 'bg-accent' } : null
+            tag: rate.status === 'active' ? { text: accommodation.tags[0]?.name, color: accommodation.tags[0]?.name === 'Bestseller' ? 'bg-green-500' : accommodation.tags[0]?.name === '-10%' ? 'bg-secondary' : 'bg-accent' } : null
           }
         })
 
@@ -98,7 +98,7 @@ export default function TrendingProperties() {
           ) : (
             <div className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4">
               {properties.map((property) => (
-                <PropertyCard key={property.id} classes={'min-w-[280px] max-w-[280px]'} property={property}/>
+                <PropertyCard key={property.id} classes={'min-w-[280px] max-w-[280px]'} property={property} />
               ))}
             </div>
           )}

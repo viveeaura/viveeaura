@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { RiArrowRightLine } from 'react-icons/ri'
 import { useState, useEffect } from 'react'
 import { fetchRates, fetchAccommodationTypes } from '@/app/api'
+import { useToast } from '@/context/toastContext'
 
 export default function FeaturedProperties() {
   const [featuredProperties, setFeaturedProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const { addToast } = useToast();
 
   useEffect(() => {
     const loadFeaturedProperties = async () => {
@@ -68,7 +71,7 @@ export default function FeaturedProperties() {
         setFeaturedProperties(properties)
       } catch (err) {
         setError('Failed to load featured properties')
-        console.error('Error loading featured properties:', err)
+        addToast(`Failed to check availability. Please try again.`, 'error')
       } finally {
         setLoading(false)
       }

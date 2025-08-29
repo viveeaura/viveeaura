@@ -1,7 +1,7 @@
 export default function TermsAndService() {
   return (
-    <main className="container mx-auto px-4 py-12 max-w-4xl my-28">
-      <section className="bg-white rounded-lg p-8">
+    <main className="container mx-auto px-4 py-12 sm:max-w-4xl my-14">
+      <section className="bg-white rounded-lg px-4">
         <h1 className="text-3xl font-bold text-primary mb-8">Terms of Service</h1>
         <p className="mb-6">Last updated: June 15, 2025</p>
 

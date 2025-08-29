@@ -76,7 +76,7 @@ export default function Apartments() {
             rating: avgRating,
             reviews: propertyReviews.length,
             description: rate.description || '',
-            tag: rate.status === 'active' ? { text: accommodation.tags[0].name, color: accommodation.tags[0].name === 'Bestseller' ? 'bg-green-500' : accommodation.tags[0].name === '-10%' ? 'bg-secondary' : 'bg-accent' } : null,
+            tag: rate.status === 'active' ? { text: accommodation.tags[0]?.name, color: accommodation.tags[0]?.name === 'Bestseller' ? 'bg-green-500' : accommodation.tags[0]?.name === '-10%' ? 'bg-secondary' : 'bg-accent' } : null,
             priceNum: basePrice, // Add this line to store the raw number
           }
         })
@@ -281,7 +281,7 @@ export default function Apartments() {
                 </h3>
                 {filterSections.bedrooms && (
                   <div className="space-y-2">
-                    {['king size', '1 king bed with premium linens'].map((bedType) => (
+                    {['2 king bed and 1 small bed', '1 king bed and 2 small bed', '2 king bed'].map((bedType) => (
                       <div key={bedType} className="flex items-center">
                         <input
                           type="checkbox"

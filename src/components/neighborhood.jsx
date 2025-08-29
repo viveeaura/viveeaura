@@ -90,7 +90,6 @@ export default function NeighborhoodGuides() {
         setNeighborhoodGuides(guides)
       } catch (err) {
         setError('Failed to load neighborhood guides')
-        console.error('Error loading neighborhood guides:', err)
       } finally {
         setLoading(false)
       }
@@ -149,7 +148,7 @@ export default function NeighborhoodGuides() {
                 <img
                   src={guide.mainImage}
                   alt={`${guide.name} Guide`}
-                  className="object-cover object-top h-full w-full"
+                  className="object-cover h-full w-full"
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Found'
                   }}
