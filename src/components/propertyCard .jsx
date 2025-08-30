@@ -85,7 +85,7 @@ export default function PropertyCard({ property, classes }) {
         <meta property="og:title" content={property.title} />
         <meta property="og:description" content={`Check out this property: ${property.title} located in ${property.location}`} />
         <meta property="og:image" content={property.image} />
-        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_WP_BASE_URL_l}/apartments/details?id=${property.id}`} />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASE_URL}/apartments/details?id=${property.id}`} />
         <meta property="og:type" content="website" />
 
         {/* Twitter Card tags for better Twitter sharing */}

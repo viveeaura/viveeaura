@@ -25,7 +25,7 @@ export async function POST(req) {
 
     // 2. Parse body
     const evt = JSON.parse(rawBody);
-    
+
     // 3. Process successful payment
     if (evt.event === 'charge.success' && evt.data?.status === 'success') {
       const bookingId = Number(evt.data?.metadata?.id);
@@ -48,8 +48,11 @@ export async function POST(req) {
           { status: 400 }
         );
       }
+
       //paypal to represent paystack since motopress lite does not recognize it 
-      await confirmBookingViaBridge(bookingId, 'paypal', evt.data.reference, booking?.total_price);
+      const checking = await confirmBookingViaBridge(bookingId, 'paypal', evt.data.reference, booking?.total_price);
+      console.log('checking', checking)
+
     }
 
     return NextResponse.json({ status: 200 });

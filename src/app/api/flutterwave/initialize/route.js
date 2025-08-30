@@ -19,7 +19,7 @@ export async function POST(req) {
         tx_ref,
         amount: total_price,
         currency: currency || 'NGN',
-        redirect_url: `${process.env.NEXT_PUBLIC_WP_BASE_URL_l}?bookingId=${id}&ref=${tx_ref}&gw=flutterwave`,
+        redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}?bookingId=${id}&ref=${tx_ref}&gw=flutterwave`,
         customer: { email, name: `${first_name} ${last_name}`, phonenumber: phone, phone_number: phone },
         meta: { bookingId: id },
       }),
