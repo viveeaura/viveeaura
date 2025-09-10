@@ -8,7 +8,7 @@ import { Suspense } from "react";
 export const metadata = {
   title: "Vivee Aura | Luxury Service Apartments in Lagos – Book Your Stay Today",
   description: "Experience premium comfort at Vivee Aura, a luxury service apartment in Lagos. Enjoy 24/7 power, security, modern amenities, and seamless booking for short or long stays.",
-  keywords: "Vivee Aura, service apartment Lagos, short let apartments Lagos, luxury apartments Lagos, temporary housing, Airbnb Lagos, holiday apartment, corporate apartment Lagos",
+  keywords: "Vivee Aura, service apartment Lagos, short let apartments Lagos, luxury apartments Lagos, temporary housing, Airbnb Lagos, holiday apartment, corporate apartment Lagos, service apartment in oshodi, service apartment in ikeja",
   openGraph: {
     title: "Vivee Aura | Luxury Service Apartments in Lagos",
     description: "Book your stay at Vivee Aura, Lagos' top choice for short-let luxury service apartments with premium amenities.",

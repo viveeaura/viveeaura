@@ -7,15 +7,15 @@ const faqs = [
     question: "What is included in the service apartment?",
     answer: [
       "Our service apartments come fully furnished with premium amenities including:",
-      ["Fully equipped kitchen", "High-speed WiFi and smart TV", "Luxury bedding", "Weekly housekeeping", "24/7 security", "Access to building amenities"]
+      ["Fully equipped kitchen", "High-speed WiFi and smart TV", "Luxury bedding", "Housekeeping on request", "24/7 security", "Access to building amenities"]
     ]
   },
   {
     question: "What is the minimum stay requirement?",
     answer: [
-      "The minimum stay requirement varies by property:",
-      ["Standard apartments: 1 month", "Premium apartments: 3 months", "Short-term stays: 7 nights"],
-      "We occasionally offer exceptions for shorter stays during off-peak seasons."
+      "We have a minimum stay requirement of 1 night.",
+      [],
+      "Guests are welcome to extend their stay for as long as they wish, subject to availability."
     ]
   },
   {
@@ -23,7 +23,7 @@ const faqs = [
     answer: [
       { title: "1. Inquiry", text: "Submit your preferred dates and property" },
       { title: "2. Confirmation", text: "Our team will confirm availability" },
-      { title: "3. Reservation", text: "Secure your stay with deposit" },
+      { title: "3. Reservation", text: "Secure your stay with payment" },
       { title: "4. Move-in", text: "Complete payment and check in" }
     ]
   },
@@ -31,24 +31,22 @@ const faqs = [
     question: "What is your cancellation policy?",
     answer: [
       "Our cancellation policy:",
-      ["30+ days: Full refund", "15-29 days: 50% refund", "0-14 days: No refund"],
-      "*Special conditions may apply"
+      ["Cancellations made more than 48 hours before check-in receive full refund, excluding charges", "No-show receive No refund"],
+      "*Special conditions may apply*"
     ]
   },
   {
     question: "Are pets allowed in the apartments?",
     answer: [
-      "We welcome pets with conditions:",
-      ["Max 2 pets", "$150 pet fee", "Vaccination records required", "Leashed in common areas"],
-      "Please inform us in advance about pets"
+      "We welcome pets with conditions",
+      []
     ]
   },
   {
     question: "Is there parking available?",
     answer: [
       "Parking availability:",
-      ["Downtown: $25/day or $300/month", "Suburban: Complimentary", "All: Street parking available"],
-      "We can help arrange long-term parking"
+      ["Yes", ],
     ]
   }
 ];
@@ -56,7 +54,7 @@ const faqs = [
 export default function FAQ() {
   return (
     <section className="py-36 bg-light">
-      <div className="container mx-auto px-4 max-w-4xl md:mt-24">
+      <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-primary">Frequently Asked Questions</h2>
           <p className="text-gray-600">Find answers about our service apartments and booking process.</p>

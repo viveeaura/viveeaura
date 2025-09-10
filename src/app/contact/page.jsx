@@ -1,6 +1,6 @@
 export default function ContactUs() {
   return (
-    <main className="bg-light py-36">
+    <main className="bg-light pt-36 pb-10">
       <section className="rounded-lg overflow-hidden container mx-auto px-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
           <div>
@@ -16,7 +16,7 @@ export default function ContactUs() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-1">Our Location</h3>
-                  <p className="text-gray-600">10 Eyinogun St, Orile Oshodi.<br />
+                  <p className="text-gray-600">10 Eyinogun St, Off Airport Road.<br />
                     Ikeja 102214, Lagos
                   </p>
                 </div>
@@ -31,8 +31,8 @@ export default function ContactUs() {
                 <div>
                   <h3 className="font-bold text-lg mb-1">Call Us</h3>
                   <p className="text-gray-600">
-                    <a href="tel:+2348032870434" className="hover:text-accent">+23 4803 287 0434</a><br />
-                    Available 9am-7pm daily
+                    <a href="tel:+2348032870434" className="hover:text-accent">+2348163926265 or +2347062745324</a><br />
+                    Available 24/7
                   </p>
                 </div>
               </div>
@@ -58,15 +58,15 @@ export default function ContactUs() {
               <ul className="space-y-2 text-gray-600">
                 <li className="flex justify-between max-w-xs">
                   <span>Monday - Friday</span>
-                  <span>9:00 AM - 7:00 PM</span>
+                  <span>00:00 - 12:00</span>
                 </li>
                 <li className="flex justify-between max-w-xs">
                   <span>Saturday</span>
-                  <span>10:00 AM - 5:00 PM</span>
+                  <span>00:00 - 12:00</span>
                 </li>
                 <li className="flex justify-between max-w-xs">
                   <span>Sunday</span>
-                  <span>11:00 AM - 4:00 PM</span>
+                  <span>00:00 - 12:00</span>
                 </li>
               </ul>
             </div>

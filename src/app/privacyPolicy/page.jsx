@@ -31,35 +31,22 @@ export default function PrivacyPolicy() {
                 <li>To process and manage your bookings and payments</li>
                 <li>To communicate with you about your reservation and stay</li>
                 <li>To improve our services and customer experience</li>
-                <li>To comply with legal obligations and prevent fraud</li>
                 <li>For marketing purposes (with your consent)</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-xl font-bold mb-4">4. Data Sharing and Disclosure</h2>
-              <p className="mb-4">We may share your information with:</p>
-              <ul className="list-disc pl-6 space-y-2 mb-4">
-                <li>Service providers who assist with our operations (payment processors, cleaning services, etc.)</li>
-                <li>Legal authorities when required by law or to protect our rights</li>
-                <li>Business partners in case of corporate transactions (mergers, acquisitions)</li>
-              </ul>
-              <p>We do not sell your personal information to third parties.</p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-bold mb-4">5. Data Security</h2>
+              <h2 className="text-xl font-bold mb-4">4. Data Security</h2>
               <p className="mb-4">We implement appropriate technical and organizational measures to protect your personal information, including:</p>
               <ul className="list-disc pl-6 space-y-2 mb-4">
                 <li>Encryption of sensitive data</li>
                 <li>Secure payment processing</li>
                 <li>Access controls to personal information</li>
               </ul>
-              <p>However, no method of transmission over the Internet or electronic storage is 100% secure.</p>
             </section>
 
             <section>
-              <h2 className="text-xl font-bold mb-4">6. Your Rights</h2>
+              <h2 className="text-xl font-bold mb-4">5. Your Rights</h2>
               <p className="mb-4">Depending on your jurisdiction, you may have the right to:</p>
               <ul className="list-disc pl-6 space-y-2 mb-4">
                 <li>Access, correct, or delete your personal information</li>
@@ -71,7 +58,7 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold mb-4">7. Cookies and Tracking Technologies</h2>
+              <h2 className="text-xl font-bold mb-4">6. Cookies and Tracking Technologies</h2>
               <p className="mb-4">We use cookies and similar tracking technologies to:</p>
               <ul className="list-disc pl-6 space-y-2 mb-4">
                 <li>Remember your preferences</li>
@@ -82,28 +69,23 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold mb-4">8. International Data Transfers</h2>
-              <p>Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place for such transfers.</p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-bold mb-4">9. Children's Privacy</h2>
+              <h2 className="text-xl font-bold mb-4">7. Children's Privacy</h2>
               <p>Our services are not directed to individuals under 18. We do not knowingly collect personal information from children.</p>
             </section>
 
             <section>
-              <h2 className="text-xl font-bold mb-4">10. Changes to This Policy</h2>
+              <h2 className="text-xl font-bold mb-4">8. Changes to This Policy</h2>
               <p>We may update this Privacy Policy periodically. We will notify you of significant changes by posting the new policy on our website.</p>
             </section>
             <section>
-              <h2 className="text-xl font-bold mb-4">11. Contact Us</h2>
+              <h2 className="text-xl font-bold mb-4">9. Contact Us</h2>
               <p className="mb-2">If you have questions about this Privacy Policy, please contact us at:</p>
               <address className="not-italic" >
                 Vivee Aura Service Apartments<br />
                 Data Protection Officer<br />
                 Email: viveeaura@gmail.com<br />
-                Phone: +2348032870434<br />
-                10 Eyinogun St, Orile Oshodi.<br />
+                Phone: +2348163926265 or +2347062745324<br />
+                10 Eyinogun St, Off Airport Road.<br />
                 Ikeja 102214, Lagos
               </address>
             </section>

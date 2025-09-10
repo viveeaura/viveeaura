@@ -22,15 +22,14 @@ export default function TermsAndService() {
 
             <h3 className="font-bold mb-2">2.2 Payment Terms</h3>
             <ul className="list-disc pl-6 space-y-2 mb-4">
-              <li>A deposit may be required to secure your reservation</li>
+              <li>A payment may be required to secure your reservation</li>
               <li>Full payment is due according to the terms specified during booking</li>
               <li>We accept major credit cards and other payment methods as indicated</li>
             </ul>
 
             <h3 className="font-bold mb-2">2.3 Cancellation Policy</h3>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Cancellations made more than 48 hours before check-in receive full refund</li>
-              <li>Cancellations within 48 hours forfeit the deposit</li>
+              <li>Cancellations made more than 48 hours before check-in receive full refund, excluding changes</li>
               <li>No-shows will be charged the full reservation amount</li>
             </ul>
           </section>
@@ -49,10 +48,10 @@ export default function TermsAndService() {
           <section>
             <h2 className="text-xl font-bold mb-4">4. Property Rules</h2>
             <ul className="list-disc pl-6 space-y-2 mb-4">
-              <li>Check-in time is 3:00 PM and check-out time is 11:00 AM</li>
-              <li>Early check-in and late check-out may be available for an additional fee</li>
+              <li>Check-in time is 13:00 and check-out time is 12:00</li>
+              <li>Late check-out may be available for an additional fee</li>
               <li>Maximum occupancy limits must be strictly observed</li>
-              <li>Parking is available on a first-come, first-served basis</li>
+              <li>Parking space is available</li>
             </ul>
           </section>
 
@@ -73,8 +72,6 @@ export default function TermsAndService() {
             <p className="mb-4">To the maximum extent permitted by law, Vivee Aura shall not be liable for:</p>
             <ul className="list-disc pl-6 space-y-2 mb-4">
               <li>Any indirect, incidental, or consequential damages</li>
-              <li>Loss or theft of personal property</li>
-              <li>Inconvenience caused by circumstances beyond our control (natural disasters, utility outages, etc.)</li>
             </ul>
           </section>
 
@@ -105,8 +102,8 @@ export default function TermsAndService() {
               Vivee Aura Service Apartments<br />
               Data Protection Officer<br />
               Email: viveeaura@gmail.com<br />
-              Phone: +2348032870434<br />
-              10 Eyinogun St, Orile Oshodi.<br />
+              Phone: +2348163926265 or +2347062745324<br />
+              10 Eyinogun St, Off Airport Road.<br />
               Ikeja 102214, Lagos
             </address>
           </section>
