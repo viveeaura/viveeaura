@@ -76,9 +76,7 @@ export default function BookingForm({ classes, accommodationTypeId, isSearchPage
   const disableDates = (date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0); // Reset time to midnight
-    const twoDaysLater = new Date(today)
-    twoDaysLater.setDate(today.getDate() + 20)
-    return date >= today && date <= twoDaysLater
+    return date >= today
   }
 
   // Update button text logic
