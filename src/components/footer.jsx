@@ -14,11 +14,11 @@ export default function Footer() {
             <p className="mb-8 text-gray-400">Subscribe to receive new listings in your preferred neighborhoods, price range,
               and amenities.</p>
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* <input type="email"
+              <input type="email"
                 className="flex-1 px-4 py-3 border border-gray-200 rounded focus:outline-none focus:border-accent"
-                placeholder="Your email address" /> */}
-              {/* <button
-                className="bg-accent hover:bg-accent/90 text-white px-6 py-3 font-medium !rounded-button whitespace-nowrap">Subscribe</button> */}
+                placeholder="Your email address" />
+              <button
+                className="bg-accent hover:bg-accent/90 text-white px-6 py-3 font-medium !rounded-button whitespace-nowrap">Subscribe</button>
             </div>
             <p className="text-xs text-gray-400 mt-4">By subscribing, you agree to our <a href="/privacyPolicy">Privacy Policy</a> and consent to receive
               updates from our company.</p>
