@@ -53,7 +53,6 @@ export default function RootLayout({ children }) {
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-TileImage" content="icons/favicon-144x144.png" />
         <meta name="msapplication-config" content="icons/browserconfig.xml" />
-        <meta name="google-site-verification" content="Ix3-VxBvXFmoDRhM6FSNYdUTME-ulJlKR-lLLcg0u10" />
       </head>
       <body>
         <Navbar />
