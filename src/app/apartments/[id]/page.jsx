@@ -11,7 +11,7 @@ import Testimonial from '@/components/testimonies'
 import { RiHome4Line, RiHotelBedLine, RiShowersLine, RiRulerLine, RiUserLine, RiRestaurantLine, RiCheckLine, RiBrushLine, RiCalendarCheckLine, RiKeyLine, RiGroupLine, RiChat3Line, RiPhoneLine, RiMapPinLine, RiCheckDoubleLine } from 'react-icons/ri'
 import TrendingProperties from '@/components/trendingProperties'
 import { useSearchParams } from 'next/navigation';
-import Custom404 from '@/app/404/page'
+import Custom404 from '@/app/[404]/page'
 import Loader from '@/components/loader'
 import { useToast } from '@/context/toastContext'
 
@@ -104,7 +104,7 @@ export default function DetailPage() {
   }
 
   return (
-    <section>
+    <main>
       {/* <!-- Property Header --> */}
       <section className='bg-light pt-28'>
         <div className="container mx-auto px-4 max-w-7xl">
@@ -336,7 +336,11 @@ export default function DetailPage() {
                             <RiCalendarCheckLine className="text-accent mr-2" />
                             Cancellation Policy
                           </h3>
-                          <p className="text-gray-600">Free cancellation up to 14 days before check-in. After that, cancel up to 24 hours before check-in and get a 50% refund (minus service fees).</p>
+                          <p className="text-gray-600">Cancellations made more than 48 hours before check-in receive full refund, excluding changes.
+                          </p>
+                          <p className="text-gray-600">
+                            No-shows will be charged the full reservation amount.
+                          </p>
                         </div>
 
                         <div>
@@ -344,8 +348,8 @@ export default function DetailPage() {
                             <RiKeyLine className="text-accent mr-2" />
                             Check-in/Check-out
                           </h3>
-                          <p className="text-gray-600">Check-in: 3:00 PM | Check-out: 11:00 AM</p>
-                          <p className="text-gray-600 text-sm mt-1">Early check-in and late check-out subject to availability</p>
+                          <p className="text-gray-600">Check-in: 13:00 | Check-out: 12:00 </p>
+                          <p className="text-gray-600 text-sm mt-1">Early check-in and late check-out may be available for additional fee and subject to availability</p>
                         </div>
 
                         <div>
@@ -389,12 +393,17 @@ export default function DetailPage() {
                       <h3 className="font-bold mb-4">Contact Property Manager</h3>
                       <p className="text-gray-600 text-sm mb-4">Have questions about this property? Our team is happy to help.</p>
 
-                      <a href="mailto:viveeaura@gmail.com" className="flex w-full justify-center bg-white border border-accent text-accent hover:bg-accent/10 py-3 font-medium !rounded-button mb-2">
+                      <a href="mailto:viveeaura@gmail.com" className="flex w-full justify-center bg-white border border-accent text-accent hover:bg-accent/10 py-3 font-medium !rounded-button mb-2 items-center">
                         <RiChat3Line className="mr-2" /> Email
                       </a>
-                      <a href="tel:+2348032870434" className="flex justify-center w-full bg-white border border-gray-300 text-gray-700 hover:border-accent hover:text-accent py-3 font-medium !rounded-button">
+                      <a href="tel:+2347062745324" className="flex justify-center w-full bg-white border border-gray-300 text-gray-700 hover:border-accent hover:text-accent py-3 font-medium !rounded-button items-center">
                         <RiPhoneLine className="mr-2" /> Call
                       </a>
+                      <h3 className="font-bold py-4">Wishes to cancel your reservation?</h3>
+
+                      <p className="text-gray-600 text-sm mb-4">Please send us an email with your <strong className='font-bold'>booking ID</strong> to reservation@viveeaura.com</p>
+                      
+
                     </div>
                   </motion.section>
                 )}
@@ -425,6 +434,6 @@ export default function DetailPage() {
         <TrendingProperties />
 
       </section>
-    </section>
+    </main>
   )
 }

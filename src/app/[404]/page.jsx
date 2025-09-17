@@ -3,7 +3,7 @@ import { RiHome4Line, RiSearchLine } from 'react-icons/ri';
 
 export default function Custom404() {
   return (
-    <main className="bg-light min-h-screen pt-36">
+    <main className="bg-light min-h-screen pt-8">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex flex-col items-center justify-center py-20 text-center">
           {/* Illustration */}
@@ -41,7 +41,7 @@ export default function Custom404() {
               className="px-6 py-3 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-medium rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               <RiSearchLine className="text-xl" />
-              Browse Properties
+              Browse Apartments
             </Link>
           </div>
 

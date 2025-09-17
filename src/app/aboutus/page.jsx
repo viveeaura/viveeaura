@@ -3,8 +3,8 @@ import { RiTeamLine, RiHomeHeartLine, RiStarSmileLine, RiMapPinLine, RiHome4Line
 
 export default function AboutUs() {
   return (
-    <section>
-      <section className="relative w-full h-[500px] bg-cover bg-center bg-[url('/balcony.jpg');]">
+    <main>
+      <section className="relative w-full h-[500px] bg-cover bg-top bg-[url('/balcony.jpg');]">
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent"></div>
         <div className="container mx-auto px-4 max-w-7xl h-full flex items-center">
           <div className="max-w-2xl text-white relative z-10">
@@ -158,6 +158,6 @@ export default function AboutUs() {
           </div>
         </section>
       </section>
-    </section>
+    </main>
   );
 }

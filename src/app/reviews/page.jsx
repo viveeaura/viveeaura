@@ -119,7 +119,7 @@ export default function ReviewPage() {
   }
 
   return (
-    <section className=" bg-light">
+    <main className=" bg-light">
       <div className="flex flex-col md:flex-row gap-12 max-w-7xl mx-auto px-4 py-32">
         {/* Left Column - Reviews List */}
         <div className="md:w-2/3">
@@ -145,7 +145,6 @@ export default function ReviewPage() {
                     type="email"
                     className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
                     placeholder="Your Email"
-                    autoComplete='true'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -294,6 +293,6 @@ export default function ReviewPage() {
           </div>
         </div>
       </div>
-    </section>
+    </main>
   );
 }

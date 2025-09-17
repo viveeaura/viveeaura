@@ -48,12 +48,19 @@ const faqs = [
       "Parking availability:",
       ["Yes", ],
     ]
+  },
+  {
+    question: "How can i cancel my reservation?",
+    answer: [
+      "Send us an email with your booking ID to reservation@viveeaura.com",
+      [],
+    ]
   }
 ];
 
 export default function FAQ() {
   return (
-    <section className="py-36 bg-light">
+    <main className="py-36 bg-light">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-primary">Frequently Asked Questions</h2>
@@ -73,7 +80,7 @@ export default function FAQ() {
           <h3 className="text-xl font-bold mb-2 text-primary">Still have questions?</h3>
           <p className="text-gray-600 mb-6">Our team is available 24/7 to assist you.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="tel:+2348032870434" className="bg-accent flex items-center hover:bg-accent/90 text-white px-6 py-3 font-medium rounded-button">
+            <a href="tel:+2347062745324" className="bg-accent flex items-center hover:bg-accent/90 text-white px-6 py-3 font-medium rounded-button">
               <RiPhoneLine className="mr-2" /> Call Us
             </a>
             <a href="mailto:viveeaura@gmail.com" className="bg-white hover:bg-gray-50 flex items-center text-primary border border-gray-200 px-6 py-3 font-medium rounded-button">
@@ -82,6 +89,6 @@ export default function FAQ() {
           </div>
         </div>
       </div>
-    </section>
+    </main>
   );
 }

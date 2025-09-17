@@ -56,6 +56,7 @@ export default function Navbar() {
             </ul>
 
             <button
+              type='button'
               className="md:hidden text-gray-700"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >

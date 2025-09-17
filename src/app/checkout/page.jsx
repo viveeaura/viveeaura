@@ -224,7 +224,7 @@ export default function CheckOut() {
 
   if (!bookingData) {
     return (
-      <section className="pt-28">
+      <main className="pt-28">
         <div className="container mx-auto px-4 py-16 max-w-7xl text-center">
           <h2 className="text-2xl font-bold mb-4">Booking Not Found</h2>
           <p className="mb-6">We couldn't retrieve your booking details.</p>
@@ -235,12 +235,12 @@ export default function CheckOut() {
             Back to Home
           </button>
         </div>
-      </section>
+      </main>
     )
   }
 
   return (
-    <section className="pt-24">
+    <main className="pt-24">
       {/* Progress Steps */}
 
       <section className="bg-white border-b border-gray-100">
@@ -816,7 +816,7 @@ export default function CheckOut() {
           </div>
         </div>
       </main>
-    </section>
+    </main>
   )
 }
 

@@ -49,7 +49,7 @@ export default function TermsAndService() {
             <h2 className="text-xl font-bold mb-4">4. Property Rules</h2>
             <ul className="list-disc pl-6 space-y-2 mb-4">
               <li>Check-in time is 13:00 and check-out time is 12:00</li>
-              <li>Late check-out may be available for an additional fee</li>
+              <li>Late check-out may be available for an additional fee and subject to availability</li>
               <li>Maximum occupancy limits must be strictly observed</li>
               <li>Parking space is available</li>
             </ul>

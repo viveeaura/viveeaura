@@ -7,7 +7,7 @@ import { RiCustomerService2Line, RiKeyLine, RiShieldCheckLine } from "react-icon
 
 export default function Home() {
   return (
-    <section className="bg-light">
+    <main className="bg-light">
       {/* <!-- Hero Section --> */}
       <section className="relative w-full h-[650px] bg-cover bg-center bg-[url('/preview.jpg')]">
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent"></div>
@@ -107,6 +107,6 @@ export default function Home() {
       </section> */}
 
       {/* <MovingTips /> */}
-    </section>
+    </main>
   );
 }

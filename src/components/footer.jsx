@@ -14,9 +14,12 @@ export default function Footer() {
             <p className="mb-8 text-gray-400">Subscribe to receive new listings in your preferred neighborhoods, price range,
               and amenities.</p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <input type="email"
+              <input
+                type="email"
                 className="flex-1 px-4 py-3 border border-gray-200 rounded focus:outline-none focus:border-accent"
-                placeholder="Your email address" />
+                placeholder="Your email address"
+                autoComplete="off" // Prevents Chrome from adding fdprocessedid
+              />
               <button
                 className="bg-accent hover:bg-accent/90 text-white px-6 py-3 font-medium !rounded-button whitespace-nowrap">Subscribe</button>
             </div>
@@ -33,15 +36,15 @@ export default function Footer() {
             </Link>
             <p className="text-white/80 text-sm mb-6">Our apartments feature well-equipped kitchens, high-speed internet, and personalized services to ensure a pleasant and hassle-free stay.</p>
             <div className="flex space-x-4">
-              <a href="#"
+              <a href="https://web.facebook.com/people/Vivee-Aura/61580463419532/" target="_blank"
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
                 <RiFacebookBoxFill />
               </a>
-              <a href="#"
+              <a href="https://www.instagram.com/vivee.aura/" target="_blank"
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
                 <RiInstagramLine />
               </a>
-              <a href="#"
+              <a href="https://www.tiktok.com/@vivee.aura?is_from_webapp=1&sender_device=pc" target="_blank"
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
                 <RiTiktokFill />
               </a>

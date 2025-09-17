@@ -107,7 +107,8 @@ export default function BookingForm({ classes, accommodationTypeId, isSearchPage
                   minDate={new Date()}
                   filterDate={disableDates}
                   placeholderText="Check-in"
-                  className="w-full py-3 pl-3 pr-16 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" />
+                  className="w-full py-3 pl-3 pr-16 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                   <RiCalendarLine className="text-gray-400" />
                 </div>
@@ -122,7 +123,8 @@ export default function BookingForm({ classes, accommodationTypeId, isSearchPage
                   minDate={checkInDate}
                   filterDate={disableDates}
                   placeholderText="Check-out"
-                  className="w-full py-3 pl-3 pr-16 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent" />
+                  className="w-full py-3 pl-3 pr-16 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
+                />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                   <RiCalendarLine className="text-gray-400" />
                 </div>
