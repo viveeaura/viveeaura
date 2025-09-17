@@ -1,5 +1,6 @@
 import BookingForm from "@/components/bookingForm";
 import FeaturedProperties from "@/components/featuredProperties";
+import GoogleTagManager from "@/components/GoogleTagManager";
 import MovingTips from "@/components/movingTips";
 import NeighborhoodGuides from "@/components/neighborhood";
 import TrendingProperties from "@/components/trendingProperties";
@@ -107,6 +108,7 @@ export default function Home() {
       </section> */}
 
       {/* <MovingTips /> */}
+      <GoogleTagManager />
     </main>
   );
 }

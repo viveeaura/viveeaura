@@ -63,6 +63,8 @@ export default function RootLayout({ children }) {
         </ToastProvider>
         <BackToTopButton />
         <Footer />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-7PYK215075"></script>
+
       </body>
     </html>
   );
