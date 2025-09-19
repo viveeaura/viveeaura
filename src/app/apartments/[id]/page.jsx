@@ -260,20 +260,23 @@ export default function DetailPage() {
                     </section>
 
                     {/* <!-- Services & Amenities --> */}
-                    <section className="mb-12">
-                      <h2 className="text-2xl font-bold mb-6">Services</h2>
+                    {property.services.length > 0 &&
+                      <section className="mb-12">
+                        <h2 className="text-2xl font-bold mb-6">Services</h2>
 
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 overflow-auto">
-                        {property.services.map((item, index) => (
-                          <div key={index} className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
-                            <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
-                              <RiBrushLine />
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 overflow-auto">
+                          {property.services.map((item, index) => (
+                            <div key={index} className="amenity-item flex items-center p-3 rounded-lg hover:bg-pale cursor-pointer">
+                              <div className="amenity-icon w-10 h-10 flex items-center justify-center bg-accent/10 rounded-full mr-3 text-accent">
+                                <RiBrushLine />
+                              </div>
+                              <span className='text-nowrap'>{item.title}</span>
                             </div>
-                            <span className='text-nowrap'>{item.title}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
+                          ))}
+                        </div>
+                      </section>
+                    }
+
                   </motion.section>
                 )}
 
@@ -402,7 +405,7 @@ export default function DetailPage() {
                       <h3 className="font-bold py-4">Wishes to cancel your reservation?</h3>
 
                       <p className="text-gray-600 text-sm mb-4">Please send us an email with your <strong className='font-bold'>booking ID</strong> to reservation@viveeaura.com</p>
-                      
+
 
                     </div>
                   </motion.section>

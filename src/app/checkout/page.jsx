@@ -753,7 +753,7 @@ export default function CheckOut() {
 
                 <div className="space-y-4 mb-6">
                   {[
-                    { id: 'flutter_wave', label: 'Flutter Wave', icon: <RiFlutterFill className="text-green-500" /> },
+                    // { id: 'flutter_wave', label: 'Flutter Wave', icon: <RiFlutterFill className="text-green-500" /> },
                     { id: 'paystack', label: 'Paystack', icon: <RiBankCardLine className="text-purple-500" /> }
                   ].map((method) => (
                     <div
