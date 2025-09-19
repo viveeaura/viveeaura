@@ -269,7 +269,6 @@ export default function CheckOut() {
 
           {/* Left Column - Booking Form */}
           <div className="lg:w-2/3">
-            <p className='text-red-400'>This website is in a testing phase, please no real payment</p>
             <h2 className="text-2xl font-bold mb-6">Complete Your Booking</h2>
 
             {activeStep === 1 && (
@@ -791,9 +790,9 @@ export default function CheckOut() {
                 <p className="text-gray-600 text-sm">
                   {new Date(formData.check_in_date).toLocaleDateString()} - {new Date(formData.check_out_date).toLocaleDateString()}
                 </p>
-              {bookingIntent?.status === "pending-payment" &&
-                <small className='text-yellow-400'>your {bookingIntent?.status}, will expire in an hour</small>
-              }
+                {bookingIntent?.status === "pending-payment" &&
+                  <small className='text-yellow-400'>your {bookingIntent?.status}, will expire in an hour</small>
+                }
               </div>
 
 
