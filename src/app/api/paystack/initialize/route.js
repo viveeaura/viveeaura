@@ -6,7 +6,17 @@ import { v4 as uuid } from 'uuid';
 export async function POST(req) {
   try {
 
-    const { id, total_price, currency, customer: { email } } = await req.json();
+    const bookingInfo = await req.json()
+
+    const id = bookingInfo.bookingIntent.id;
+    const total_price = bookingInfo?.pricing?.basePrice;
+    const currency = bookingInfo?.bookingIntent?.currency;
+    const email = bookingInfo?.bookingIntent?.customer?.email;
+    const first_name = bookingInfo?.bookingIntent?.customer?.first_name;
+    const last_name = bookingInfo?.bookingIntent?.customer?.last_name;
+    const phone = bookingInfo?.bookingIntent?.customer?.phone;
+
+    // const { id, total_price, currency, customer: { email } } = await req.json();
 
     const reference = `bk_${id}_${uuid()}`;
 
@@ -21,6 +31,9 @@ export async function POST(req) {
       },
       body: JSON.stringify({
         email,
+        first_name,
+        last_name,
+        phone,
         amount: amountKobo,
         currency: currency || 'NGN',
         reference,

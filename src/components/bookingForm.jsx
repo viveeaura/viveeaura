@@ -191,7 +191,7 @@ export default function BookingForm({ classes, accommodationTypeId, isSearchPage
               {availability.availability.length > 0 ? (
                 <div>
                   <p className="text-green-700">Available for your selected dates!</p>
-                  <p className="text-sm mt-1">Base price: {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format((availability.availability[0].base_price)).toLocaleString()}</p>
+                  {/* <p className="text-sm mt-1">Base price: {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format((availability.availability[0].base_price)).toLocaleString()}</p> */}
                 </div>
               ) : (
                 <p className="text-red-700">No availability for selected dates</p>

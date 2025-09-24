@@ -154,7 +154,10 @@ export default function PropertyCard({ property, classes }) {
         {/* Price and booking */}
         <div className="flex justify-between items-center border-t pt-3">
           <div>
-            <span className="font-bold text-lg">{property.price}</span>
+            <div className="text-gray-500 line-through text-sm">
+              {property.discounted === '₦0.00/night' ? '' : property.discounted}
+            </div>
+            <div className="font-bold text-lg">{property?.price}</div>
           </div>
           <Link href={`/apartments/details?id=${property.id}`} className="bg-accent/10 hover:bg-accent text-accent hover:text-white p-2 rounded-full transition-colors">
             <RiCalendarLine className="w-6 h-6" />

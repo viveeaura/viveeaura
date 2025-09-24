@@ -56,12 +56,18 @@ export default function SearchResultsPage() {
             ? propertyReviews.reduce((sum, review) => sum + parseInt(review.rating), 0) / propertyReviews.length
             : 0 // Default if no reviews
 
+          const basePrice = rate.season_prices
+          const pricePerNight = `${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(basePrice?.[0]?.base_price || 0)}/night`
+          const discountedPricePerNight = `${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(basePrice?.[1]?.base_price || 0)}/night`
+
+
           return {
             id: rate.id,
             title: rate.title,
             location: accommodation?.view,
             image: accommodation?.images?.[0]?.src,
-            price: `${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(rate.season_prices?.[0]?.base_price)}/night`,
+            price: pricePerNight,
+            discounted: discountedPricePerNight,
             size: accommodation?.size,
             bed: accommodation?.bed_type,
             adults: accommodation?.adults,

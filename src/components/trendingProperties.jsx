@@ -27,8 +27,9 @@ export default function TrendingProperties() {
           const accommodation = accommodationTypes.find(acc => acc.id === rate.accommodation_type_id)
 
           // Find the base price (you might want to implement more sophisticated price logic)
-          const basePrice = rate.season_prices?.[0]?.base_price || 0
-          const pricePerNight = `${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(basePrice)}/night`
+          const basePrice = rate.season_prices
+          const pricePerNight = `${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(basePrice?.[0]?.base_price || 0)}/night`
+          const discountedPricePerNight = `${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(basePrice?.[1]?.base_price || 0)}/night`
 
           // Get the first image if available
           const image = accommodation?.images?.[0]?.src || 'https://via.placeholder.com/280x320'
@@ -50,6 +51,7 @@ export default function TrendingProperties() {
             location: accommodation?.view || 'Location not specified',
             image,
             price: pricePerNight,
+            discounted: discountedPricePerNight,
             size: `Room Size: ${accommodation?.size || 'N/A'}sqm`,
             bed: `Bed: ${accommodation?.bed_type || 'N/A'}`,
             max: `Max: ${accommodation?.adults || 0} adults, ${accommodation?.children || 0} children`,

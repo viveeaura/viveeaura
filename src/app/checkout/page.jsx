@@ -120,6 +120,7 @@ export default function CheckOut() {
       const bookingId = localStorage.getItem("bookingId");
       if (bookingId) {
         const initialBooking = await fetchBooking(bookingId)
+
         if (initialBooking?.status === "pending-payment") {
           setActiveStep(2)
           setBookingIntent(initialBooking)
@@ -190,16 +191,17 @@ export default function CheckOut() {
       // Handle payment based on selected method
       if (paymentMethod === 'flutter_wave') {
         // Redirect to flutterwave
-        const data = await payWithFlutterwave(bookingIntent)
+        const data = await payWithFlutterwave({ bookingIntent, ...bookingData })
 
         if (data?.link) {
           location.href = data.link;
         } else {
           addToast('Could not start Flutterwave', 'error')
         }
+
       } else if (paymentMethod === 'paystack') {
         // Process Paystack payment
-        const data = await payWithPaystack(bookingIntent)
+        const data = await payWithPaystack({ bookingIntent, ...bookingData })
         if (data?.authorization_url) {
           location.href = data.authorization_url;
         } else {
@@ -801,7 +803,7 @@ export default function CheckOut() {
                 <span>{new Intl.NumberFormat('en-NG', {
                   style: 'currency',
                   currency: 'NGN'
-                }).format(bookingIntent?.total_price ?? bookingData?.pricing?.total)}</span>
+                }).format(bookingData?.pricing?.total)}</span>
               </div>
 
               <div className="bg-pale rounded-lg p-4 mb-6">

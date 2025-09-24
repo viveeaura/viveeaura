@@ -30,28 +30,26 @@ export async function POST(req) {
     if (evt.event === 'charge.success' && evt.data?.status === 'success') {
       const bookingId = Number(evt.data?.metadata?.id);
       const amountPaidKobo = Number(evt.data?.amount);
-      
+
       if (!bookingId || isNaN(bookingId)) {
         return NextResponse.json(
           { error: 'Missing or invalid bookingId in metadata' },
           { status: 400 }
         );
       }
-      
-      // Optional: sanity check against current booking total in WP
-      const booking = await fetchBooking(bookingId);
-      const expected = Math.round(Number(booking?.total_price ?? booking?.total ?? 0)) * 100; // kobo
 
-      if (expected && amountPaidKobo < expected) {
-        return NextResponse.json(
-          { error: `Underpayment: Paid ${paidAmount}, expected ${expectedAmount}` },
-          { status: 400 }
-        );
-      }
+      // Optional: sanity check against current booking total in WP
+      const expected = Math.round(Number(amountPaidKobo ?? 0)) / 100; // kobo
+
+      // if (expected && amountPaidKobo < expected) {
+      //   return NextResponse.json(
+      //     { error: `Underpayment: Paid ${amountPaidKobo}, expected ${expected}` },
+      //     { status: 400 }
+      //   );
+      // }
 
       //paypal to represent paystack since motopress lite does not recognize it 
-      const checking = await confirmBookingViaBridge(bookingId, 'paypal', evt.data.reference, booking?.total_price);
-      console.log('checking', checking)
+      await confirmBookingViaBridge(bookingId, 'paypal', evt.data.reference, expected);
 
     }
 
