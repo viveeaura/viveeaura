@@ -8,7 +8,7 @@ export async function GET(req) {
     const url = id
       ? `${process.env.NEXT_PUBLIC_WP_BASE_URL}/reviews/${id}`
       : `${process.env.NEXT_PUBLIC_WP_BASE_URL}/reviews`;
-
+    console.log('review',url)
     const response = await fetch(url);
     const data = await response.json();
     return NextResponse.json({ success: true, data }, { status: 200 });

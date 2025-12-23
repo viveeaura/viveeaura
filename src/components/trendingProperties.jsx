@@ -45,6 +45,7 @@ export default function TrendingProperties() {
             ? propertyReviews.reduce((sum, review) => sum + parseInt(review.rating), 0) / propertyReviews.length
             : 0 // Default if no reviews
 
+
           return {
             id: rate.id,
             title: rate.title || 'Untitled Property',

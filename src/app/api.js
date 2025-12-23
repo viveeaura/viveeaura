@@ -128,8 +128,6 @@ export async function payWithPaystack(bookingInfo) {
 }
 
 export async function confirmBookingViaBridge(bookingId, gateway, tx_ref, amount) {
-  console.log('generatedSignature')
-
   const res = await fetch(`${process.env.NEXT_PUBLIC_WP_BASE_URL_API}/wp-json/mphb-bridge/v1/confirm-booking`, {
     method: 'POST',
     headers: {

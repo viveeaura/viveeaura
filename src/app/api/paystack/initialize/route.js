@@ -9,7 +9,7 @@ export async function POST(req) {
     const bookingInfo = await req.json()
 
     const id = bookingInfo.bookingIntent.id;
-    const total_price = bookingInfo?.pricing?.basePrice;
+    const total_price = bookingInfo?.pricing?.total;
     const currency = bookingInfo?.bookingIntent?.currency;
     const email = bookingInfo?.bookingIntent?.customer?.email;
     const first_name = bookingInfo?.bookingIntent?.customer?.first_name;
