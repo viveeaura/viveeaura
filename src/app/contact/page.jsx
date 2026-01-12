@@ -76,7 +76,7 @@ export default function ContactUs() {
             <h2 className="text-2xl font-bold mb-6">Find Us on the Map</h2>
             <div className="h-full w-full">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.347721934088!2d3.328323315266828!3d6.605510324018057!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b9158a5d0b8a5%3A0x5a5f5e5b5a5f5e5b!2s10%20Eyinogun%20St%2C%20Orile%20Oshodi%2C%20Ikeja%20102214%2C%20Lagos!5e0!3m2!1sen!2sng!4v1689871420823!5m2!1sen!2sng"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.7382548538435!2d3.329580174602315!3d6.554691593438375!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8fcc757e694b%3A0xba27be5d6f6977e1!2sVivee%20Aura%20Service%20Apartment!5e0!3m2!1sen!2sng!4v1768216844492!5m2!1sen!2sng"
                 width="100%"
                 height="100%"
                 style={{ border: "0" }}
